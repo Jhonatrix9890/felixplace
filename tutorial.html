@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Felix Place - Detalle del tutorial tecnológico." />
+  <title>Felix Place | Tutorial</title>
+
+  <!-- 🔹 Estilos -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/tutoriales.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+</head>
+
+<body>
+
+  <!-- 🔹 NAVBAR -->
+  <header class="navbar">
+    <div class="nav-logo">
+      <img src="assets/logo.png" alt="Felix Place Logo" />
+      <span>Felix Place</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="noticias.html">Noticias</a>
+      <a href="tutoriales.html" class="active">Tutoriales</a>
+      <a href="sugerencias.html" >Sugerencias</a>
+      <a href="#" class="search"><i class="fa fa-search"></i></a>
+    </nav>
+  </header>
+
+  <!-- 🔹 ENCABEZADO DETALLE TUTORIAL -->
+<section class="banner-detalle-tutorial">
+  <div class="banner-contenido">
+    <h1>🎓 Felix Place</h1>
+    <p>te enseña paso a paso 🚀</p>
+  </div>
+</section>
+
+  <!-- 🔹 CONTENEDOR DETALLE -->
+  <main class="detalle-container" id="detalleTutorial">
+    <p class="cargando">🌀 Cargando tutorial...</p>
+  </main>
+
+  <!-- 🔹 FOOTER (igual que en noticias) -->
+  <footer class="footer">
+    <div class="redes-footer">
+      <a href="#"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+      <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="#"><i class="fa-brands fa-youtube"></i></a>
+    </div>
+
+    <div class="footer-text">
+      <h3>Felix Place</h3>
+      <p>
+        Felix Place es un espacio digital dedicado a descubrir y compartir lo mejor del mundo tecnológico:
+        curiosidades, tendencias, innovación y herramientas digitales que transforman la forma en que vivimos y trabajamos.
+      </p>
+      <p class="copy">© FELIXPLACE 2025 TODOS LOS DERECHOS RESERVADOS</p>
+    </div>
+  </footer>
+
+  <!-- 🔹 SCRIPT -->
+  <script>
+    const urlAPI = "https://script.google.com/macros/s/AKfycbzmARWM16igJZpAvyHvEiIvWSuhEslzFkhckAccm1vTF9ZTWq6T1SPS8SMTt46RDLWIKg/exec";
+
+    async function cargarDetalle() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const contenedor = document.getElementById("detalleTutorial");
+
+      if (!id) {
+        contenedor.innerHTML = "<p class='error'>❌ ID de tutorial no proporcionado.</p>";
+        return;
+      }
+
+      contenedor.innerHTML = "<p class='cargando'>🌀 Cargando tutorial...</p>";
+
+      try {
+        const response = await fetch(`${urlAPI}?action=getTutorialById&id=${id}`);
+        const tutorial = await response.json();
+
+        if (!tutorial || !tutorial.titulo) {
+          contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró el tutorial solicitado.</p>";
+          return;
+        }
+
+        const videoID = extraerID(tutorial.url);
+        contenedor.innerHTML = `
+          <article class="detalle-tutorial">
+            <h2>${tutorial.titulo}</h2>
+            <p class="categoria">📚 ${tutorial.categoria}</p>
+            <div class="video-container">
+              <iframe width="100%" height="460" src="https://www.youtube.com/embed/${videoID}" 
+                frameborder="0" allowfullscreen></iframe>
+            </div>
+            <p class="descripcion">${tutorial.descripcion}</p>
+            <p class="meta"><strong>Autor:</strong> ${tutorial.autor || "Felix Place"} • 
+            <strong>Duración:</strong> ${tutorial.duracion || "—"}</p>
+          </article>
+        `;
+      } catch (error) {
+        contenedor.innerHTML = "<p class='error'>❌ Error al cargar el tutorial.</p>";
+        console.error(error);
+      }
+    }
+
+    function extraerID(url) {
+      const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
+      return match ? match[1] : "";
+    }
+
+    cargarDetalle();
+  </script>
+
+</body>
+</html>

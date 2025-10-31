@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Felix Place - Detalle de noticia tecnológica." />
+  <title>Felix Place | Detalle de Noticia</title>
+
+  <!-- 🔹 Estilos -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/noticias.css" />
+
+  <!-- 🔹 Fuentes e iconos -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+</head>
+
+<body>
+
+  <!-- 🔹 NAVBAR -->
+  <header class="navbar">
+    <div class="nav-logo">
+      <img src="assets/logo.png" alt="Felix Place Logo" />
+      <span>Felix Place</span>
+    </div>
+    <nav class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="noticias.html" class="active">Noticias</a>
+       <a href="tutoriales.html">Tutoriales</a>
+      <a href="sugerencias.html" >Sugerencias</a>
+      <a href="#" class="search"><i class="fa fa-search"></i></a>
+    </nav>
+  </header>
+
+<section class="banner-detalle">
+  <div class="banner-overlay"></div>
+  <div class="banner-contenido">
+    <h1><i class="fa-solid fa-bolt"></i> Felix Place</h1>
+    <p>te cuenta la historia completa 📰</p>
+  </div>
+</section>
+
+  <!-- 🔹 CONTENEDOR DETALLE -->
+  <main class="detalle-container" id="detalleNoticia">
+    <p class="cargando">🌀 Cargando noticia...</p>
+  </main>
+
+  <!-- 🔹 FOOTER -->
+  <footer class="footer">
+    <div class="redes-footer">
+      <a href="#"><i class="fa-brands fa-instagram"></i></a>
+      <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+      <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="#"><i class="fa-brands fa-youtube"></i></a>
+    </div>
+
+    <div class="footer-text">
+      <h3>Felix Place</h3>
+      <p>
+        Felix Place es un espacio digital dedicado a descubrir y compartir lo mejor del mundo tecnológico:
+        curiosidades, tendencias, innovación y herramientas digitales que transforman la forma en que vivimos y trabajamos.
+      </p>
+      <p class="copy">© FELIXPLACE 2025 TODOS LOS DERECHOS RESERVADOS</p>
+    </div>
+  </footer>
+
+  <!-- 🔹 SCRIPT DETALLE -->
+  <script>
+    const urlScript = "https://script.google.com/macros/s/AKfycbzsfhciTh0XOQ5AQqWxgGWIwz0UoqgOHJR2Sbwxl9BS8H05cjDTbsokrAiY97NPwZjO/exec";
+
+    async function cargarDetalle() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const contenedor = document.getElementById("detalleNoticia");
+
+      if (!id) {
+        contenedor.innerHTML = "<p class='error'>❌ ID de noticia no proporcionado.</p>";
+        return;
+      }
+
+      contenedor.innerHTML = "<p class='cargando'>🌀 Cargando noticia...</p>";
+
+      try {
+        const response = await fetch(`${urlScript}?accion=buscarPorId&id=${id}`);
+        const noticia = await response.json();
+
+        if (!noticia || !noticia.titulo) {
+          contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró la noticia solicitada.</p>";
+          return;
+        }
+
+        contenedor.innerHTML = `
+          <article class="detalle-noticia">
+            <p class="categoria">${noticia.categoria?.toUpperCase() || "GENERAL"}</p>
+            <h2>${noticia.titulo}</h2>
+            <p class="descripcion">${noticia.descripcion || ""}</p>
+
+            <div class="meta">
+              <span>Por <strong>${noticia.autor || "Felix Place"}</strong></span> •
+              <span>${noticia.fecha || ""}</span>
+            </div>
+
+            <img src="${noticia.imagenURL}" alt="${noticia.titulo}" class="imagen-detalle">
+
+            <div class="contenido">
+              <p>${noticia.contenido || ""}</p>
+            </div>
+          </article>
+        `;
+      } catch (error) {
+        contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
+        console.error(error);
+      }
+    }
+
+    cargarDetalle();
+  </script>
+
+</body>
+</html>

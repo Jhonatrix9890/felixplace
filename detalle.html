@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Felix Place - Detalle de noticia tecnológica." />
+  <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Felix Place" />
+    <meta property="og:title" content="Felix Place | Detalle de Noticia" id="ogTitle" />
+    <meta property="og:description" content="Felix Place comparte lo mejor del mundo tecnológico." id="ogDescription" />
+    <meta property="og:image" content="https://felixplace.com/assets/preview.png" id="ogImage" />
+    <meta property="og:url" content="" id="ogUrl" />
   <title>Felix Place | Detalle de Noticia</title>
 
   <!-- 🔹 Estilos -->
@@ -114,6 +120,8 @@
           </article>
           
         `;
+        // ✅ Coloca esta línea justo después de que el contenido ya está en pantalla
+          actualizarOpenGraph(noticia); 
       } catch (error) {
         contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
         console.error(error);
@@ -131,6 +139,13 @@
           window.open(enlace, "_blank", "width=600,height=500");
         }
       });
+
+      function actualizarOpenGraph(tutorial) {
+        document.querySelector("#ogTitle").setAttribute("content", tutorial.titulo);
+        document.querySelector("#ogDescription").setAttribute("content", tutorial.descripcion);
+        document.querySelector("#ogImage").setAttribute("content", tutorial.imagenURL || tutorial.imagen || "https://felixplace.com/assets/preview.png");
+        document.querySelector("#ogUrl").setAttribute("content", window.location.href);
+      }
 
   </script>
 

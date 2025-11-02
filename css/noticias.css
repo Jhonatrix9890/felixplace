@@ -423,3 +423,27 @@
   }
 }
 
+.share-container {
+  margin-top: 25px;
+  text-align: right; /* 👈 cambia center por left */
+}
+
+.btn-share {
+  background-color: #1877f2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-share i {
+  margin-right: 8px;
+}
+
+.btn-share:hover {
+  background-color: #145db8;
+}
+

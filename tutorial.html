@@ -47,10 +47,10 @@
   <!-- 🔹 FOOTER (igual que en noticias) -->
   <footer class="footer">
     <div class="redes-footer">
-      <a href="#"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-      <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-      <a href="#"><i class="fa-brands fa-youtube"></i></a>
+      <a href=""><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@felixplace13"><i class="fa-brands fa-tiktok"></i></a>
+      <a href="https://www.facebook.com/felixplace13"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="https://www.youtube.com/@felixplace2947"><i class="fa-brands fa-youtube"></i></a>
     </div>
 
     <div class="footer-text">
@@ -64,57 +64,88 @@
   </footer>
 
   <!-- 🔹 SCRIPT -->
-  <script>
-    const urlAPI = "https://script.google.com/macros/s/AKfycbzmARWM16igJZpAvyHvEiIvWSuhEslzFkhckAccm1vTF9ZTWq6T1SPS8SMTt46RDLWIKg/exec";
+<script>
+  const urlAPI = "https://script.google.com/macros/s/AKfycbxHNB59r3Z56tT4ZICaXEE5Bf7a0_yqc2zS62gfIab3Ngo_TXzYZPV2yEBUKvIsstTipw/exec";
 
-    async function cargarDetalle() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("id");
-      const contenedor = document.getElementById("detalleTutorial");
+  async function cargarDetalle() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const contenedor = document.getElementById("detalleTutorial");
 
-      if (!id) {
-        contenedor.innerHTML = "<p class='error'>❌ ID de tutorial no proporcionado.</p>";
+    if (!id) {
+      contenedor.innerHTML = "<p class='error'>❌ ID de tutorial no proporcionado.</p>";
+      return;
+    }
+
+    contenedor.innerHTML = "<p class='cargando'>🌀 Cargando tutorial...</p>";
+
+    try {
+      const response = await fetch(`${urlAPI}?action=getTutorialById&id=${id}`);
+      const tutorial = await response.json();
+
+      if (!tutorial || !tutorial.titulo) {
+        contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró el tutorial solicitado.</p>";
         return;
       }
 
-      contenedor.innerHTML = "<p class='cargando'>🌀 Cargando tutorial...</p>";
+      // 🧩 Extraer ID del video
+      const videoID = extraerID(tutorial.url);
 
-      try {
-        const response = await fetch(`${urlAPI}?action=getTutorialById&id=${id}`);
-        const tutorial = await response.json();
+      // 🧠 Formatear duración y fecha
+      const duracion = tutorial.duracion && tutorial.duracion !== "Invalid Date"
+        ? tutorial.duracion
+        : "—";
+      const fecha = tutorial.fecha ? new Date(tutorial.fecha).toLocaleDateString("es-ES") : "";
 
-        if (!tutorial || !tutorial.titulo) {
-          contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró el tutorial solicitado.</p>";
-          return;
-        }
+      // ✨ Mostrar todo el contenido con el detalle
+      contenedor.innerHTML = `
+        <article class="detalle-tutorial">
+          <h2>${tutorial.titulo}</h2>
+          <p class="categoria">📚 ${tutorial.categoria}</p>
 
-        const videoID = extraerID(tutorial.url);
-        contenedor.innerHTML = `
-          <article class="detalle-tutorial">
-            <h2>${tutorial.titulo}</h2>
-            <p class="categoria">📚 ${tutorial.categoria}</p>
-            <div class="video-container">
-              <iframe width="100%" height="460" src="https://www.youtube.com/embed/${videoID}" 
-                frameborder="0" allowfullscreen></iframe>
-            </div>
-            <p class="descripcion">${tutorial.descripcion}</p>
-            <p class="meta"><strong>Autor:</strong> ${tutorial.autor || "Felix Place"} • 
-            <strong>Duración:</strong> ${tutorial.duracion || "—"}</p>
-          </article>
-        `;
-      } catch (error) {
-        contenedor.innerHTML = "<p class='error'>❌ Error al cargar el tutorial.</p>";
-        console.error(error);
-      }
+          <div class="video-container">
+            <iframe width="100%" height="460" 
+              src="https://www.youtube.com/embed/${videoID}" 
+              frameborder="0" allowfullscreen>
+            </iframe>
+          </div>
+
+          <p class="descripcion">${tutorial.descripcion}</p>
+          <p class="meta">
+            <strong>Autor:</strong> ${tutorial.autor || "Felix Place"} • 
+            <strong>Duración:</strong> ${duracion}
+          </p>
+
+          <!-- 🔹 NUEVA SECCIÓN DE DETALLE -->
+          <div class="detalle-texto">
+            ${formatearTexto(tutorial.detalle || "Sin detalle disponible.")}
+          </div>
+
+          <p class="fecha-publicacion">📅 Publicado el: ${fecha}</p>
+        </article>
+      `;
+    } catch (error) {
+      contenedor.innerHTML = "<p class='error'>❌ Error al cargar el tutorial.</p>";
+      console.error(error);
     }
+  }
 
-    function extraerID(url) {
-      const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
-      return match ? match[1] : "";
-    }
+  function extraerID(url) {
+    const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
+    return match ? match[1] : "";
+  }
 
-    cargarDetalle();
-  </script>
+  // 🪶 Formatea el texto del campo "detalle" con saltos de línea
+  function formatearTexto(texto) {
+    return texto
+      .split("\n")
+      .map(linea => `<p>${linea.trim()}</p>`)
+      .join("");
+  }
+
+  cargarDetalle();
+</script>
+
 
 </body>
 </html>

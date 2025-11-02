@@ -50,9 +50,9 @@
   <footer class="footer">
     <div class="redes-footer">
       <a href="#"><i class="fa-brands fa-instagram"></i></a>
-      <a href="#"><i class="fa-brands fa-tiktok"></i></a>
-      <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-      <a href="#"><i class="fa-brands fa-youtube"></i></a>
+      <a href="https://www.tiktok.com/@felixplace13"><i class="fa-brands fa-tiktok"></i></a>
+      <a href="https://www.facebook.com/felixplace13"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="https://www.youtube.com/@felixplace2947"><i class="fa-brands fa-youtube"></i></a>
     </div>
 
     <div class="footer-text">
@@ -67,7 +67,7 @@
 
   <!-- 🔹 SCRIPT DETALLE -->
   <script>
-    const urlScript = "https://script.google.com/macros/s/AKfycbzsfhciTh0XOQ5AQqWxgGWIwz0UoqgOHJR2Sbwxl9BS8H05cjDTbsokrAiY97NPwZjO/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbwa1Jr7YBWJRV19SYbmEODovKocDmMnZONzKOABRRUmhTRi_z-a_7YFiY70g9lCRDs6/exec";
 
     async function cargarDetalle() {
       const params = new URLSearchParams(window.location.search);
@@ -92,6 +92,11 @@
 
         contenedor.innerHTML = `
           <article class="detalle-noticia">
+            <div class="share-container" align="left">
+              <button class="btn-share" id="shareFacebook">
+                <i class="fa-brands fa-facebook-f"></i> Compartir en Facebook
+              </button>
+            </div>
             <p class="categoria">${noticia.categoria?.toUpperCase() || "GENERAL"}</p>
             <h2>${noticia.titulo}</h2>
             <p class="descripcion">${noticia.descripcion || ""}</p>
@@ -107,6 +112,7 @@
               <p>${noticia.contenido || ""}</p>
             </div>
           </article>
+          
         `;
       } catch (error) {
         contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
@@ -115,6 +121,17 @@
     }
 
     cargarDetalle();
+
+    // 🟦 Compartir noticia en Facebook
+      document.addEventListener("click", function(e) {
+        if (e.target.closest("#shareFacebook")) {
+          const urlActual = window.location.href;
+          const titulo = document.querySelector(".detalle-tutorial h2")?.textContent || "Felix Place";
+          const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo)}`;
+          window.open(enlace, "_blank", "width=600,height=500");
+        }
+      });
+
   </script>
 
 </body>

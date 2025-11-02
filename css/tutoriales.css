@@ -332,3 +332,22 @@
     font-size: 0.9rem;
   }
 }
+
+.detalle-texto {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+  line-height: 1.8;
+  font-size: 1rem;
+  color: #333;
+}
+
+.detalle-texto p {
+  margin-bottom: 12px;
+}
+
+.fecha-publicacion {
+  margin-top: 20px;
+  font-style: italic;
+  color: #666;
+}

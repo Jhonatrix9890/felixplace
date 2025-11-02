@@ -140,10 +140,10 @@
         }
       });
 
-      function actualizarOpenGraph(tutorial) {
-        document.querySelector("#ogTitle").setAttribute("content", tutorial.titulo);
-        document.querySelector("#ogDescription").setAttribute("content", tutorial.descripcion);
-        document.querySelector("#ogImage").setAttribute("content", tutorial.imagenURL || tutorial.imagen || "https://felixplace.com/assets/preview.png");
+      function actualizarOpenGraph(noticia) {
+        document.querySelector("#ogTitle").setAttribute("content", noticia.titulo);
+        document.querySelector("#ogDescription").setAttribute("content", noticia.descripcion);
+        document.querySelector("#ogImage").setAttribute("content", noticia.imagenURL || noticia.imagen || "https://felixplace.com/assets/preview.png");
         document.querySelector("#ogUrl").setAttribute("content", window.location.href);
       }
 

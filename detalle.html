@@ -135,7 +135,10 @@
         if (e.target.closest("#shareFacebook")) {
           const urlActual = window.location.href;
           const titulo = document.querySelector(".detalle-tutorial h2")?.textContent || "Felix Place";
-          const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo)}`;
+          const descripcion = document.querySelector(".descripcion")?.textContent || "";
+          const imagen = document.querySelector(".imagen-detalle")?.src || "";
+          const enlace = `https://www.facebook.com/dialog/share?app_id=87741124305&display=popup&href=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo + " - " + descripcion)}&picture=${encodeURIComponent(imagen)}`;
+
           window.open(enlace, "_blank", "width=600,height=500");
         }
       });

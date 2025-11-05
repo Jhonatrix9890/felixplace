@@ -1,0 +1,224 @@
+/* ==============================
+   🔹 ESTILOS DE PÁGINA PRINCIPAL
+   ============================== */
+
+/* 🔹 HERO PRINCIPAL */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  background: url("../assets/banner_inicio.jpg") center center / cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 20, 50, 0.6);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.hero-content h1 span {
+  color: #00ffff;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: #d9ecff;
+  font-style: italic;
+  margin-bottom: 25px;
+}
+
+.btn-principal {
+  background-color: #00ffff;
+  color: #001f3f;
+  font-weight: 600;
+  padding: 12px 26px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-principal:hover {
+  background-color: #ffffff;
+  color: #001f3f;
+}
+
+/* 🔹 INTRO */
+.intro {
+  background: #eaf5ff;
+  padding: 80px 10%;
+  text-align: center;
+}
+
+.intro h2 {
+  color: #001f3f;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.intro p {
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  max-width: 800px;
+  margin: 0 auto 30px;
+  text-align: justify;
+}
+
+.intro-img {
+  width: 100%;
+  max-width: 550px;
+  margin-top: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔹 DESTACADOS */
+.destacados {
+  background: #ffffff;
+  padding: 80px 10%;
+  text-align: center;
+}
+
+.destacados h2 {
+  font-size: 2rem;
+  color: #001f3f;
+  margin-bottom: 40px;
+}
+
+.destacados-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.destacados-grid article {
+  background: #f7faff;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.destacados-grid article:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.destacados-grid img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.destacados-grid h3 {
+  font-size: 1.2rem;
+  color: #002855;
+  font-weight: 600;
+  margin: 15px 20px 10px;
+}
+
+.destacados-grid p {
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0 20px 20px;
+  text-align: justify;
+}
+
+.btn-leer {
+  display: inline-block;
+  background-color: #001f3f;
+  color: #00ffff;
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 25px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.btn-leer:hover {
+  background-color: #00ffff;
+  color: #001f3f;
+}
+
+/* 🔹 BOTONES FLOTANTES */
+.social-floating {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.social-floating a {
+  background-color: #00ffff;
+  color: #001f3f;
+  font-size: 1.3rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00ffff;
+  transition: all 0.3s ease;
+}
+
+.social-floating a:hover {
+  transform: scale(1.1);
+  background-color: #ffffff;
+  color: #001f3f;
+}
+
+/* 🔹 RESPONSIVE */
+@media (max-width: 768px) {
+  .hero {
+    height: 65vh;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .intro {
+    padding: 60px 8%;
+  }
+
+  .intro p {
+    font-size: 1rem;
+  }
+
+  .destacados {
+    padding: 60px 8%;
+  }
+}

@@ -12,17 +12,21 @@
   <!-- 🔹 Fuentes e Iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-   <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
 </head>
 <body>
 
   <!-- 🔹 NAVBAR -->
   <header class="navbar">
-    <div class="nav-logo">
+    <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Felix Place Logo" />
       <span>Felix Place</span>
-    </div>
-    <nav class="nav-links">
+    </a>
+
+    <!-- Menú hamburguesa -->
+    <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
+
+    <nav class="nav-links" id="navLinks">
       <a href="index.html">Inicio</a>
       <a href="noticias.html">Noticias</a>
       <a href="tutoriales.html">Tutoriales</a>
@@ -33,7 +37,7 @@
 
   <!-- 🔹 BANNER -->
   <section class="banner-sugerencias">
-    <img src="assets/baner_sugerencias.jpg" alt="Banner Sugerencias" class="banner-bg">
+    <img src="assets/baner_sugerencias.jpg" alt="Banner Sugerencias" class="banner-bg" />
     <div class="banner-overlay"></div>
     <div class="banner-content">
       <h1>💡 Buzón de Sugerencias</h1>
@@ -45,10 +49,10 @@
   <section class="formulario-sugerencias">
     <form id="formSugerencias">
       <label for="nombre">Nombre:</label>
-      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+      <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required />
 
       <label for="correo">Correo electrónico:</label>
-      <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com" required>
+      <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com" required />
 
       <label for="mensaje">Tu sugerencia:</label>
       <textarea id="mensaje" name="mensaje" rows="5" placeholder="Escribe aquí tu sugerencia..." required></textarea>
@@ -81,39 +85,48 @@
 
   <!-- 🔹 SCRIPT -->
   <script>
-  const urlScript = "https://script.google.com/macros/s/AKfycbwL1ZMh6k2Lj3i4BgfswotNwdRugWF7Ca0Xv225rf3hyrwfDqx4zNIXUV5f-EOYNF9BlQ/exec";
+    const urlScript = "https://script.google.com/macros/s/AKfycbwL1ZMh6k2Lj3i4BgfswotNwdRugWF7Ca0Xv225rf3hyrwfDqx4zNIXUV5f-EOYNF9BlQ/exec";
 
-  document.getElementById("formSugerencias").addEventListener("submit", async (e) => {
-    e.preventDefault();
+    document.getElementById("formSugerencias").addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("nombre", document.getElementById("nombre").value);
-    formData.append("correo", document.getElementById("correo").value);
-    formData.append("mensaje", document.getElementById("mensaje").value);
+      const formData = new FormData();
+      formData.append("nombre", document.getElementById("nombre").value);
+      formData.append("correo", document.getElementById("correo").value);
+      formData.append("mensaje", document.getElementById("mensaje").value);
 
-    try {
-      const res = await fetch(urlScript, {
-        method: "POST",
-        body: formData
-      });
+      try {
+        const res = await fetch(urlScript, {
+          method: "POST",
+          body: formData
+        });
 
-      const json = await res.json();
+        const json = await res.json();
 
-      if (json.success) {
-        document.getElementById("mensajeExito").classList.remove("oculto");
-        document.getElementById("formSugerencias").reset();
-        setTimeout(() => {
-          document.getElementById("mensajeExito").classList.add("oculto");
-        }, 4000);
-      } else {
+        if (json.success) {
+          document.getElementById("mensajeExito").classList.remove("oculto");
+          document.getElementById("mensajeError").classList.add("oculto");
+          document.getElementById("formSugerencias").reset();
+          setTimeout(() => {
+            document.getElementById("mensajeExito").classList.add("oculto");
+          }, 4000);
+        } else {
+          document.getElementById("mensajeError").classList.remove("oculto");
+        }
+      } catch (error) {
         document.getElementById("mensajeError").classList.remove("oculto");
+        console.error(error);
       }
-    } catch (error) {
-      document.getElementById("mensajeError").classList.remove("oculto");
-      console.error(error);
-    }
-  });
-</script>
+    });
+
+    // 🔹 Menú móvil
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+    });
+  </script>
 
 </body>
 </html>

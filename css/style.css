@@ -85,7 +85,7 @@ body {
   display: block;
 }
 
-/* Menú hamburguesa (solo móvil por defecto oculto) */
+/* Menú hamburguesa */
 .menu-toggle {
   display: none;
   font-size: 26px;
@@ -261,37 +261,74 @@ body {
 }
 
 /* ================================
-   🔹 CONTENIDOS ESPECÍFICOS
+   🔹 CONTENIDOS ESPECÍFICOS (AJUSTE VISUAL RESTAURADO)
 ================================== */
 .contenido-datos,
 .contenido-herramientas,
 .contenido-futuro {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 80px 10%;
   gap: 50px;
-  padding: 70px 10%;
   flex-wrap: wrap;
 }
+
+.contenido-datos img,
+.contenido-herramientas img,
+.contenido-futuro img {
+  width: 420px;
+  max-width: 45%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.contenido-datos .texto,
+.contenido-herramientas .texto,
+.contenido-futuro .texto {
+  flex: 1;
+  min-width: 320px;
+}
+
+.contenido-datos h2,
+.contenido-herramientas h2,
+.contenido-futuro h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #001f3f;
+  margin-bottom: 15px;
+}
+
+.contenido-datos p,
+.contenido-herramientas p,
+.contenido-futuro p {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #222;
+  text-align: justify;
+}
+
+.contenido-herramientas {
+  flex-direction: row-reverse;
+}
+
+/* Fondos alternados */
 .contenido-datos {
-  background-color: #e6f1ff;
+  background-color: #eaf3ff;
+}
+.contenido-herramientas {
+  background-color: #ffffff;
 }
 .contenido-futuro {
-  background-color: #002855;
-}
-.contenido-futuro .texto h2 {
-  color: #ffffff;
-}
-.contenido-futuro .texto p {
-  color: #dfe8f0;
+  background-color: #eaf3ff;
 }
 
 /* ================================
    🔹 MODO MÓVIL
 ================================== */
 @media (max-width: 768px) {
-
-  /* HERO móvil centrado y en 3 líneas */
   .hero-content.left {
     top: 5%;
     left: 50%;
@@ -322,14 +359,11 @@ body {
     height: 48px;
     pointer-events: none;
     z-index: 1;
-    background: linear-gradient(
-      to bottom,
+    background: linear-gradient(to bottom,
       rgba(0, 31, 63, 0) 0%,
-      rgba(255, 255, 255, 1) 100%
-    );
+      rgba(255, 255, 255, 1) 100%);
   }
 
-  /* 🔹 Solo visible en móvil */
   .menu-toggle {
     display: block;
   }
@@ -355,89 +389,27 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .nav-links a:last-child {
-    border-bottom: none;
-  }
-
-  .contenido {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .contenido img {
-    max-width: 80%;
-    margin: 20px 0;
-  }
-
-  .social-fixed {
-    bottom: 15px;
-    right: 15px;
-  }
-
+  .contenido-datos,
+  .contenido-herramientas,
   .contenido-futuro {
     flex-direction: column;
+    padding: 50px 20px;
     text-align: center;
   }
 
-  .contenido-futuro .texto {
-    order: 2;
-  }
-
+  .contenido-datos img,
+  .contenido-herramientas img,
   .contenido-futuro img {
-    order: 1;
-    max-width: 320px;
+    width: 100%;
+    max-width: 350px;
   }
 }
 
-/* ==============================
+/* ================================
    🔒 Control del ícono hamburguesa
-   ============================== */
-
-/* Ocultar menú hamburguesa en pantallas grandes */
+================================== */
 @media (min-width: 769px) {
   .menu-toggle {
     display: none !important;
   }
 }
-
-/* Mostrar menú hamburguesa solo en móvil */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-    font-size: 1.6rem;
-    color: #ffffff;
-    cursor: pointer;
-    margin-right: 20px;
-  }
-
-  /* ocultar enlaces cuando el menú está cerrado */
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    background-color: #001f3f;
-    position: absolute;
-    top: 70px;
-    right: 0;
-    width: 200px;
-    border-radius: 0 0 10px 10px;
-    padding: 10px 0;
-    text-align: right;
-    z-index: 999;
-  }
-
-  /* mostrar cuando se hace clic */
-  .nav-links.show {
-    display: flex;
-  }
-
-  .nav-links a {
-    padding: 10px 20px;
-    color: #fff;
-  }
-
-  .nav-links a:hover {
-    background-color: #00ffff;
-    color: #001f3f;
-  }
-}
-

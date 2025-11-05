@@ -486,3 +486,45 @@
     margin: 20px 0;
   }
 }
+
+/* ===============================
+   🔹 Ajuste de ancho del texto en móvil
+   =============================== */
+@media (max-width: 768px) {
+
+  /* Contenedor general más ancho */
+  .detalle-noticia {
+    padding: 20px 10px !important; /* antes 25px 18px */
+  }
+
+  /* Texto del contenido más fluido */
+  .detalle-noticia .contenido {
+    font-size: 1rem;
+    line-height: 1.9;
+    text-align: justify;
+    margin-top: 15px;
+    padding: 0 6px; /* margen lateral mínimo */
+  }
+
+  /* Ajuste del título y descripción */
+  .detalle-noticia h2 {
+    font-size: 1.4rem;
+    margin: 0 10px 10px;
+    line-height: 1.4;
+  }
+
+  .detalle-noticia .descripcion {
+    font-size: 0.95rem;
+    color: #333;
+    margin: 0 12px 15px;
+    text-align: center;
+  }
+
+  /* Imagen más ancha */
+  .imagen-detalle {
+    width: 100%;
+    border-radius: 10px;
+    margin: 15px 0;
+  }
+}
+

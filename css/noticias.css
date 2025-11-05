@@ -447,3 +447,42 @@
   background-color: #145db8;
 }
 
+/* ===============================
+   🔹 Mejoras visuales en móvil
+   =============================== */
+@media (max-width: 768px) {
+  .detalle-noticia {
+    padding: 25px 18px;
+    border-radius: 10px;
+  }
+
+  .detalle-noticia h2 {
+    font-size: 1.4rem;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .detalle-noticia .descripcion {
+    font-size: 0.95rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .detalle-noticia .contenido {
+    font-size: 1rem;
+    line-height: 1.9;
+    text-align: justify;
+    margin-top: 15px;
+  }
+
+  .detalle-noticia .contenido p {
+    margin-bottom: 18px;
+  }
+
+  .imagen-detalle {
+    border-radius: 10px;
+    margin: 20px 0;
+  }
+}

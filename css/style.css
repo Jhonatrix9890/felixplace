@@ -1,3 +1,6 @@
+/* ================================
+   🔹 ESTILOS GENERALES
+================================== */
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
@@ -5,7 +8,9 @@ body {
   background-color: #f7f7f7;
 }
 
-/* 🔹 NAVBAR */
+/* ================================
+   🔹 NAVBAR
+================================== */
 .navbar {
   background-color: #001f3f;
   color: white;
@@ -19,37 +24,33 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-.nav-logo img {
-  width: 34px;
-  margin-right: 10px;
-  vertical-align: middle;
-}
-
-.nav-logo span {
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* 🔹 Corregir estilo del logo enlace */
+/* Logo */
 .nav-logo {
   display: flex;
   align-items: center;
   text-decoration: none;
   color: white;
 }
-
 .nav-logo:hover {
   color: #00ffff;
 }
+.nav-logo img {
+  width: 34px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+.nav-logo span {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
 
-/* 🔹 Espaciado del menú */
+/* Links */
 .nav-links {
   display: flex;
   align-items: center;
   gap: 35px;
 }
-
 .nav-links a {
   color: #ffffffcc;
   text-decoration: none;
@@ -57,33 +58,54 @@ body {
   font-size: 18px;
   transition: 0.3s;
 }
-
 .nav-links a:hover,
 .nav-links a.active {
   color: #00ffff;
   font-weight: 600;
 }
 
-/* 🔹 HERO */
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #002a5a;
+  padding: 10px;
+  border-radius: 6px;
+  top: 25px;
+}
+.dropdown-content a {
+  display: block;
+  color: white;
+  margin: 5px 0;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Menú hamburguesa (solo móvil por defecto oculto) */
+.menu-toggle {
+  display: none;
+  font-size: 26px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ================================
+   🔹 HERO PRINCIPAL
+================================== */
 .hero {
   position: relative;
   text-align: left;
   color: white;
 }
-
-.hero-content {
-  position: absolute;
-  z-index: 2;
-}
-
 .hero-bg {
-  display: block;
   width: 100%;
   height: 52vh;
   object-fit: cover;
 }
-
-/* 🔹 PC: texto a la izquierda (como antes) */
 .hero-content.left {
   position: absolute;
   top: 42%;
@@ -92,14 +114,15 @@ body {
   max-width: 480px;
   text-align: left;
 }
-
 .hero-content h2 {
   font-size: 1.9rem;
   font-weight: 600;
   line-height: 1.4;
 }
 
-/* 🔹 REDES SOCIALES FIJAS */
+/* ================================
+   🔹 REDES SOCIALES FIJAS
+================================== */
 .social-fixed {
   position: fixed;
   bottom: 25px;
@@ -109,7 +132,6 @@ body {
   gap: 12px;
   z-index: 9999;
 }
-
 .social-fixed a {
   background: #00ffff;
   color: #001f3f;
@@ -124,13 +146,14 @@ body {
   box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
   transition: all 0.3s ease;
 }
-
 .social-fixed a:hover {
   transform: scale(1.2);
   box-shadow: 0 0 20px #00ffff, 0 0 35px #00ffff;
 }
 
-/* 🔹 CATEGORÍAS */
+/* ================================
+   🔹 CATEGORÍAS
+================================== */
 .categorias {
   display: flex;
   justify-content: center;
@@ -139,12 +162,10 @@ body {
   padding: 20px 0 60px 0;
   gap: 60px;
 }
-
 .cat-card {
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .cat-card img {
   width: 180px;
   height: 180px;
@@ -152,23 +173,22 @@ body {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
 }
-
 .cat-card p {
   margin-top: 15px;
   font-weight: 600;
   font-size: 1.05rem;
 }
-
 .cat-card:hover img {
   transform: scale(1.15);
   box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
 }
-
 .cat-card:hover {
   transform: translateY(-6px);
 }
 
-/* 🔹 SECCIONES GENERALES */
+/* ================================
+   🔹 SECCIONES GENERALES
+================================== */
 .contenido {
   display: flex;
   align-items: center;
@@ -176,26 +196,24 @@ body {
   padding: 60px 40px;
   background: white;
 }
-
 .contenido img {
   width: 320px;
   max-width: 40%;
 }
-
 .contenido .texto {
   width: 55%;
 }
-
 .contenido.light {
   background-color: #e8f2ff;
 }
-
 .contenido.dark {
   background-color: #001f3f;
   color: white;
 }
 
-/* 🔹 FOOTER */
+/* ================================
+   🔹 FOOTER
+================================== */
 .footer {
   background-color: #001f3f;
   color: #ffffff;
@@ -203,11 +221,9 @@ body {
   padding: 45px 10% 25px;
   text-align: center;
 }
-
 .footer .redes-footer {
   margin-bottom: 20px;
 }
-
 .footer .redes-footer a {
   color: #00ffff;
   font-size: 1.5rem;
@@ -215,24 +231,20 @@ body {
   text-decoration: none;
   transition: all 0.3s ease;
 }
-
 .footer .redes-footer a:hover {
   transform: scale(1.2);
   color: #ffffff;
   text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
-
 .footer .footer-text {
   max-width: 800px;
   margin: 0 auto;
 }
-
 .footer .footer-text h3 {
   font-weight: 600;
   font-size: 1rem;
   margin-bottom: 10px;
 }
-
 .footer .footer-text p {
   font-size: 0.75rem;
   line-height: 1.7;
@@ -240,7 +252,6 @@ body {
   text-align: justify;
   margin-bottom: 10px;
 }
-
 .footer .footer-text .copy {
   font-size: 0.7rem;
   color: #aebed2;
@@ -249,42 +260,57 @@ body {
   letter-spacing: 0.5px;
 }
 
-.copy {
-  margin-top: 20px;
-  font-size: 13px;
-  opacity: 0.8;
+/* ================================
+   🔹 CONTENIDOS ESPECÍFICOS
+================================== */
+.contenido-datos,
+.contenido-herramientas,
+.contenido-futuro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  padding: 70px 10%;
+  flex-wrap: wrap;
+}
+.contenido-datos {
+  background-color: #e6f1ff;
+}
+.contenido-futuro {
+  background-color: #002855;
+}
+.contenido-futuro .texto h2 {
+  color: #ffffff;
+}
+.contenido-futuro .texto p {
+  color: #dfe8f0;
 }
 
-/* 🔹 RESPONSIVE */
+/* ================================
+   🔹 MODO MÓVIL
+================================== */
 @media (max-width: 768px) {
-  .contenido {
-    flex-direction: column;
-    text-align: center;
-  }
 
-  .contenido img {
-    max-width: 80%;
-    margin: 20px 0;
-  }
-
-  .nav-links {
-    display: none;
-  }
-
-  /* 🔹 HERO: texto arriba del muñequito, más compacto */
+  /* HERO móvil centrado y en 3 líneas */
   .hero-content.left {
-    top: 5%; /* arriba del muñeco */
+    top: 5%;
     left: 50%;
     transform: translate(-50%, 0);
     text-align: center;
-    max-width: 90%;
+    width: 100%;
+    padding: 0 40px;
     z-index: 2;
   }
 
   .hero-content h2 {
-    font-size: 1.15rem; /* 🔹 más pequeño en celular */
-    line-height: 1.25; /* 🔹 menos interlineado */
+    display: inline-block;
+    font-size: 1rem;
+    line-height: 1.3;
+    max-width: 280px;
+    margin: 0 auto;
+    text-align: center;
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+    word-wrap: break-word;
   }
 
   .hero::after {
@@ -303,22 +329,7 @@ body {
     );
   }
 
-  .social-fixed {
-    bottom: 15px;
-    right: 15px;
-  }
-}
-
-/* 🔹 Ícono menú hamburguesa */
-.menu-toggle {
-  display: none;
-  font-size: 26px;
-  color: white;
-  cursor: pointer;
-}
-
-/* Modo móvil */
-@media (max-width: 768px) {
+  /* 🔹 Solo visible en móvil */
   .menu-toggle {
     display: block;
   }
@@ -347,4 +358,86 @@ body {
   .nav-links a:last-child {
     border-bottom: none;
   }
+
+  .contenido {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .contenido img {
+    max-width: 80%;
+    margin: 20px 0;
+  }
+
+  .social-fixed {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .contenido-futuro {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .contenido-futuro .texto {
+    order: 2;
+  }
+
+  .contenido-futuro img {
+    order: 1;
+    max-width: 320px;
+  }
 }
+
+/* ==============================
+   🔒 Control del ícono hamburguesa
+   ============================== */
+
+/* Ocultar menú hamburguesa en pantallas grandes */
+@media (min-width: 769px) {
+  .menu-toggle {
+    display: none !important;
+  }
+}
+
+/* Mostrar menú hamburguesa solo en móvil */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+    font-size: 1.6rem;
+    color: #ffffff;
+    cursor: pointer;
+    margin-right: 20px;
+  }
+
+  /* ocultar enlaces cuando el menú está cerrado */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    background-color: #001f3f;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 200px;
+    border-radius: 0 0 10px 10px;
+    padding: 10px 0;
+    text-align: right;
+    z-index: 999;
+  }
+
+  /* mostrar cuando se hace clic */
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 10px 20px;
+    color: #fff;
+  }
+
+  .nav-links a:hover {
+    background-color: #00ffff;
+    color: #001f3f;
+  }
+}
+

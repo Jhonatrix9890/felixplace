@@ -4,13 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Felix Place - Detalle de noticia tecnológica." />
+
+  <!-- 🔹 Open Graph -->
   <meta property="og:type" content="article" />
-    <meta property="og:site_name" content="Felix Place" />
-    <meta property="og:title" content="Felix Place | Noticias Tecnológicas" id="ogTitle" />
-    <meta property="og:description" content="Felix Place comparte lo mejor del mundo tecnológico." id="ogDescription" />
-    <meta property="og:image" content="https://felixplace.com/assets/preview.png" id="ogImage" />
-    <meta property="og:url" content="" id="ogUrl" />
-  <title>Felix Place | Noticias </title>
+  <meta property="og:site_name" content="Felix Place" />
+  <meta property="og:title" content="Felix Place | Noticias Tecnológicas" id="ogTitle" />
+  <meta property="og:description" content="Felix Place comparte lo mejor del mundo tecnológico." id="ogDescription" />
+  <meta property="og:image" content="https://felixplace.com/assets/preview.png" id="ogImage" />
+  <meta property="og:url" content="" id="ogUrl" />
+
+  <title>Felix Place | Noticias</title>
 
   <!-- 🔹 Estilos -->
   <link rel="stylesheet" href="css/style.css" />
@@ -26,28 +29,33 @@
 
   <!-- 🔹 NAVBAR -->
   <header class="navbar">
-    <div class="nav-logo">
+    <a href="index.html" class="nav-logo">
       <img src="assets/logo.png" alt="Felix Place Logo" />
       <span>Felix Place</span>
-    </div>
-    <nav class="nav-links">
+    </a>
+
+    <!-- Menú hamburguesa -->
+    <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
+
+    <nav class="nav-links" id="navLinks">
       <a href="index.html">Inicio</a>
       <a href="noticias.html" class="active">Noticias</a>
-       <a href="tutoriales.html">Tutoriales</a>
-      <a href="sugerencias.html" >Sugerencias</a>
+      <a href="tutoriales.html">Tutoriales</a>
+      <a href="sugerencias.html">Sugerencias</a>
       <a href="#" class="search"><i class="fa fa-search"></i></a>
     </nav>
   </header>
 
-<section class="banner-detalle">
-  <div class="banner-overlay"></div>
-  <div class="banner-contenido">
-    <h1><i class="fa-solid fa-bolt"></i> Felix Place</h1>
-    <p>te cuenta la historia completa 📰</p>
-  </div>
-</section>
+  <!-- 🔹 BANNER DETALLE -->
+  <section class="banner-detalle">
+    <div class="banner-overlay"></div>
+    <div class="banner-contenido">
+      <h1><i class="fa-solid fa-bolt"></i> Felix Place</h1>
+      <p>te cuenta la historia completa 📰</p>
+    </div>
+  </section>
 
-  <!-- 🔹 CONTENEDOR DETALLE -->
+  <!-- 🔹 DETALLE DE NOTICIA -->
   <main class="detalle-container" id="detalleNoticia">
     <p class="cargando">🌀 Cargando noticia...</p>
   </main>
@@ -98,7 +106,7 @@
 
         contenedor.innerHTML = `
           <article class="detalle-noticia">
-            <div class="share-container" align="left">
+            <div class="share-container">
               <button class="btn-share" id="shareFacebook">
                 <i class="fa-brands fa-facebook-f"></i> Compartir en Facebook
               </button>
@@ -115,13 +123,13 @@
             <img src="${noticia.imagenURL}" alt="${noticia.titulo}" class="imagen-detalle">
 
             <div class="contenido">
-              <p>${noticia.contenido || ""}</p>
+              ${noticia.contenido || ""}
             </div>
           </article>
-          
         `;
-        // ✅ Coloca esta línea justo después de que el contenido ya está en pantalla
-          actualizarOpenGraph(noticia); 
+
+        actualizarOpenGraph(noticia);
+
       } catch (error) {
         contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
         console.error(error);
@@ -131,25 +139,30 @@
     cargarDetalle();
 
     // 🟦 Compartir noticia en Facebook
-      document.addEventListener("click", function(e) {
-        if (e.target.closest("#shareFacebook")) {
-            const urlActual = window.location.href;
-            const titulo = document.querySelector(".detalle-noticia h2")?.textContent || "Felix Place";
-            const descripcion = document.querySelector(".descripcion")?.textContent || "";
-            const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo + " - " + descripcion)}`;
-            window.open(enlace, "_blank", "width=600,height=500");
+    document.addEventListener("click", function(e) {
+      if (e.target.closest("#shareFacebook")) {
+        const urlActual = window.location.href;
+        const titulo = document.querySelector(".detalle-noticia h2")?.textContent || "Felix Place";
+        const descripcion = document.querySelector(".descripcion")?.textContent || "";
+        const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo + " - " + descripcion)}`;
+        window.open(enlace, "_blank", "width=600,height=500");
+      }
+    });
 
-        }
-      });
+    function actualizarOpenGraph(noticia) {
+      document.querySelector("#ogTitle").setAttribute("content", noticia.titulo);
+      document.querySelector("#ogDescription").setAttribute("content", noticia.descripcion);
+      document.querySelector("#ogImage").setAttribute("content", noticia.imagenURL);
+      document.querySelector("#ogUrl").setAttribute("content", window.location.href);
+    }
 
-function actualizarOpenGraph(noticia) {
-  document.querySelector("#ogTitle").setAttribute("content", noticia.titulo);
-  document.querySelector("#ogDescription").setAttribute("content", noticia.descripcion);
-  document.querySelector("#ogImage").setAttribute("content", noticia.imagenURL);
-  document.querySelector("#ogUrl").setAttribute("content", window.location.href);
-}
+    // 🔹 Menú móvil
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
 
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+    });
   </script>
-
 </body>
 </html>

@@ -14,9 +14,12 @@
 
   <!-- 🔹 NAVBAR -->
   <header class="navbar">
-    <div class="nav-logo">
-      <img src="assets/logo.png" alt="Felix Place Logo">
-      <span>Felix Place</span>
+<a href="index.html" class="nav-logo">
+  <img src="assets/logo.png" alt="Felix Place Logo">
+  <span>Felix Place</span>
+</a>
+    <div class="menu-toggle" id="menu-toggle">
+       <i class="fa fa-bars"></i>
     </div>
     <nav class="nav-links">
       <a href="index.html" class="active">Inicio</a>
@@ -117,6 +120,14 @@
     <p class="copy">© FELIXPLACE 2025 TODOS LOS DERECHOS RESERVADOS</p>
   </div>
 </footer>
+<script>
+  const menuToggle = document.getElementById('menu-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  
+  menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+  });
+</script>
 
 </body>
 </html>

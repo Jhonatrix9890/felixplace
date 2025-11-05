@@ -20,7 +20,7 @@ body {
 }
 
 .nav-logo img {
-  width: 34px; /* antes 42px → más pequeño y equilibrado */
+  width: 34px;
   margin-right: 10px;
   vertical-align: middle;
 }
@@ -31,11 +31,23 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* 🔹 Corregir estilo del logo enlace */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+}
+
+.nav-logo:hover {
+  color: #00ffff;
+}
+
 /* 🔹 Espaciado del menú */
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 35px; /* Aumenta el espacio entre las opciones */
+  gap: 35px;
 }
 
 .nav-links a {
@@ -52,30 +64,6 @@ body {
   font-weight: 600;
 }
 
-/* 🔹 Dropdown */
-.dropdown {
-  position: relative;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #002a5a;
-  padding: 10px;
-  border-radius: 6px;
-  top: 25px;
-}
-
-.dropdown-content a {
-  display: block;
-  color: white;
-  margin: 5px 0;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
 /* 🔹 HERO */
 .hero {
   position: relative;
@@ -83,23 +71,27 @@ body {
   color: white;
 }
 
+.hero-content {
+  position: absolute;
+  z-index: 2;
+}
+
 .hero-bg {
+  display: block;
   width: 100%;
-  height: 52vh; /* altura final: suficiente para mostrar todas las imágenes inferiores */
+  height: 52vh;
   object-fit: cover;
 }
 
-
+/* 🔹 PC: texto a la izquierda (como antes) */
 .hero-content.left {
   position: absolute;
-  top: 42%; /* bajamos considerablemente (antes 26%) */
+  top: 42%;
   left: 10%;
-  transform: translate(0, -40%); /* movemos menos hacia arriba */
+  transform: translate(0, -40%);
   max-width: 480px;
   text-align: left;
 }
-
-
 
 .hero-content h2 {
   font-size: 1.9rem;
@@ -138,23 +130,20 @@ body {
   box-shadow: 0 0 20px #00ffff, 0 0 35px #00ffff;
 }
 
+/* 🔹 CATEGORÍAS */
 .categorias {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   background: white;
-  padding: 20px 0 60px 0; /* antes 60px arriba, ahora 20px */
-  gap: 60px; /* mantiene separación horizontal */
+  padding: 20px 0 60px 0;
+  gap: 60px;
 }
-
-
 
 .cat-card {
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
-
 
 .cat-card img {
   width: 180px;
@@ -170,7 +159,6 @@ body {
   font-size: 1.05rem;
 }
 
-/* Efecto hover */
 .cat-card:hover img {
   transform: scale(1.15);
   box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
@@ -180,7 +168,7 @@ body {
   transform: translateY(-6px);
 }
 
-/* 🔹 SECCIONES */
+/* 🔹 SECCIONES GENERALES */
 .contenido {
   display: flex;
   align-items: center;
@@ -216,7 +204,6 @@ body {
   text-align: center;
 }
 
-/* Redes sociales */
 .footer .redes-footer {
   margin-bottom: 20px;
 }
@@ -235,7 +222,6 @@ body {
   text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
 }
 
-/* Texto del footer */
 .footer .footer-text {
   max-width: 800px;
   margin: 0 auto;
@@ -243,19 +229,18 @@ body {
 
 .footer .footer-text h3 {
   font-weight: 600;
-  font-size: 1rem; /* más pequeño */
+  font-size: 1rem;
   margin-bottom: 10px;
 }
 
 .footer .footer-text p {
-  font-size: 0.75rem; /* letra muy pequeña */
+  font-size: 0.75rem;
   line-height: 1.7;
   color: #dfe8f0;
-  text-align: justify; /* justificado */
+  text-align: justify;
   margin-bottom: 10px;
 }
 
-/* Línea de derechos reservados */
 .footer .footer-text .copy {
   font-size: 0.7rem;
   color: #aebed2;
@@ -263,7 +248,6 @@ body {
   text-align: center;
   letter-spacing: 0.5px;
 }
-
 
 .copy {
   margin-top: 20px;
@@ -287,30 +271,37 @@ body {
     display: none;
   }
 
+  /* 🔹 HERO: texto arriba del muñequito, más compacto */
   .hero-content.left {
-    top: 45%;
-    left: 5%;
+    top: 5%; /* arriba del muñeco */
+    left: 50%;
+    transform: translate(-50%, 0);
+    text-align: center;
     max-width: 90%;
+    z-index: 2;
   }
 
   .hero-content h2 {
-    font-size: 1.4rem;
+    font-size: 1.15rem; /* 🔹 más pequeño en celular */
+    line-height: 1.25; /* 🔹 menos interlineado */
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
   }
 
   .hero::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -24px;          /* ajusta si lo quieres más alto/bajo */
-  height: 48px;           /* grosor de la transición */
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 31, 63, 0) 0%,
-    rgba(255, 255, 255, 1) 100%
-  );
-}
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -24px;
+    height: 48px;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 31, 63, 0) 0%,
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
 
   .social-fixed {
     bottom: 15px;
@@ -318,149 +309,42 @@ body {
   }
 }
 
-.contenido.light .texto h2 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  color: #002855;
-  margin-bottom: 20px;
-  font-size: 2rem; /* título un poco más grande */
+/* 🔹 Ícono menú hamburguesa */
+.menu-toggle {
+  display: none;
+  font-size: 26px;
+  color: white;
+  cursor: pointer;
 }
 
-.contenido.light .texto p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.15rem; /* párrafo un poco más grande */
-  line-height: 1.8;
-  text-align: justify; /* texto justificado */
-  color: #1c1c1c;
-}
-
-.contenido-herramientas {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 50px;
-  padding: 70px 10%;
-  background-color: #fff;
-  flex-wrap: wrap;
-}
-
-.contenido-herramientas img {
-  width: 90%;
-  max-width: 420px;
-}
-
-.contenido-herramientas .texto {
-  flex: 1;
-  min-width: 300px;
-}
-
-.contenido-herramientas .texto h2 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  color: #002855;
-  margin-bottom: 20px;
-  font-size: 2rem; /* igual que la anterior sección */
-}
-
-.contenido-herramientas .texto p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  text-align: justify;
-  color: #1c1c1c;
-}
-
-
-/* CONTENIDO DATOS*/
-
-.contenido-datos {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 50px;
-  padding: 70px 10%;
-  background-color: #e6f1ff;
-  flex-wrap: wrap;
-}
-
-.contenido-datos img {
-  width: 90%;
-  max-width: 300px;
-}
-
-.contenido-datos .texto {
-  flex: 1;
-  min-width: 300px;
-}
-
-.contenido-datos .texto h2 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  color: #002855;
-  margin-bottom: 20px;
-  font-size: 2rem; /* igual que la anterior sección */
-}
-
-.contenido-datos .texto p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  text-align: justify;
-  color: #1c1c1c;
-}
-
-
-
-
-
-.contenido-futuro {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 50px;
-  padding: 80px 10%;
-  background-color: #002855; /* azul oscuro moderno */
-  flex-wrap: wrap;
-}
-
-.contenido-futuro .texto {
-  flex: 1;
-  min-width: 300px;
-}
-
-.contenido-futuro .texto h2 {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  color: #ffffff; /* texto blanco */
-  margin-bottom: 20px;
-  font-size: 2rem;
-}
-
-.contenido-futuro .texto p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.15rem;
-  line-height: 1.8;
-  text-align: justify;
-  color: #dfe8f0; /* blanco suave */
-}
-
-.contenido-futuro img {
-  width: 90%;
-  max-width: 300px;
-}
-
+/* Modo móvil */
 @media (max-width: 768px) {
-  .contenido-futuro {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
     flex-direction: column;
+    position: absolute;
+    top: 65px;
+    right: 0;
+    width: 100%;
+    background-color: #001f3f;
+    padding: 20px 0;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
     text-align: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .contenido-futuro .texto {
-    order: 2;
-  }
-
-  .contenido-futuro img {
-    order: 1;
-    max-width: 320px;
+  .nav-links a:last-child {
+    border-bottom: none;
   }
 }

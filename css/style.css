@@ -261,7 +261,7 @@ body {
 }
 
 /* ================================
-   🔹 CONTENIDOS ESPECÍFICOS (AJUSTE VISUAL RESTAURADO)
+   🔹 CONTENIDOS ESPECÍFICOS (IMÁGENES REDUCIDAS Y AJUSTADAS)
 ================================== */
 .contenido-datos,
 .contenido-herramientas,
@@ -269,60 +269,56 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 80px 10%;
-  gap: 50px;
+  gap: 60px;
+  padding: 70px 10%;
   flex-wrap: wrap;
 }
 
-.contenido-datos img,
-.contenido-herramientas img,
-.contenido-futuro img {
-  width: 420px;
-  max-width: 45%;
-  height: auto;
-  object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+/* 1️⃣ Datos curiosos → texto izquierda, imagen derecha */
+.contenido-datos {
+  flex-direction: row;
+  background-color: #e6f1ff;
+}
+
+/* 2️⃣ Herramientas digitales → texto izquierda, imagen derecha (corregido) */
+.contenido-herramientas {
+  flex-direction: row;
+  background-color: #ffffff;
+}
+
+/* 3️⃣ Innovación y futuro → texto izquierda, imagen derecha */
+.contenido-futuro {
+  flex-direction: row;
+  background-color: #002855;
 }
 
 .contenido-datos .texto,
 .contenido-herramientas .texto,
 .contenido-futuro .texto {
   flex: 1;
-  min-width: 320px;
-}
-
-.contenido-datos h2,
-.contenido-herramientas h2,
-.contenido-futuro h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #001f3f;
-  margin-bottom: 15px;
-}
-
-.contenido-datos p,
-.contenido-herramientas p,
-.contenido-futuro p {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: #222;
+  min-width: 300px;
+  max-width: 550px;
   text-align: justify;
 }
 
-.contenido-herramientas {
-  flex-direction: row-reverse;
+/* 🔹 Imágenes 50% más pequeñas */
+.contenido-datos img,
+.contenido-herramientas img,
+.contenido-futuro img {
+  flex: 1;
+  width: 200px;
+  max-width: 30%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 
-/* Fondos alternados */
-.contenido-datos {
-  background-color: #eaf3ff;
+.contenido-futuro .texto h2 {
+  color: #ffffff;
 }
-.contenido-herramientas {
-  background-color: #ffffff;
-}
-.contenido-futuro {
-  background-color: #eaf3ff;
+.contenido-futuro .texto p {
+  color: #dfe8f0;
 }
 
 /* ================================
@@ -359,9 +355,11 @@ body {
     height: 48px;
     pointer-events: none;
     z-index: 1;
-    background: linear-gradient(to bottom,
+    background: linear-gradient(
+      to bottom,
       rgba(0, 31, 63, 0) 0%,
-      rgba(255, 255, 255, 1) 100%);
+      rgba(255, 255, 255, 1) 100%
+    );
   }
 
   .menu-toggle {
@@ -393,21 +391,18 @@ body {
   .contenido-herramientas,
   .contenido-futuro {
     flex-direction: column;
-    padding: 50px 20px;
     text-align: center;
+    padding: 50px 20px;
   }
 
   .contenido-datos img,
   .contenido-herramientas img,
   .contenido-futuro img {
-    width: 100%;
-    max-width: 350px;
+    max-width: 80%;
+    margin: 25px auto 0;
   }
 }
 
-/* ================================
-   🔒 Control del ícono hamburguesa
-================================== */
 @media (min-width: 769px) {
   .menu-toggle {
     display: none !important;

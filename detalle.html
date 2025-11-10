@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- 🔹 Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7838540041490564"
      crossorigin="anonymous"></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Felix Place - Detalle de noticia tecnológica." />
@@ -24,6 +26,8 @@
   <!-- 🔹 Fuentes e iconos -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- 🔹 Favicon -->
   <link rel="icon" type="image/png" href="assets/favicon.ico" />
   <link rel="apple-touch-icon" href="https://felixplace.com/assets/favicon.png">
 </head>
@@ -83,89 +87,133 @@
   </footer>
 
   <!-- 🔹 SCRIPT DETALLE -->
-  <script>
-    const urlScript = "https://script.google.com/macros/s/AKfycbwa1Jr7YBWJRV19SYbmEODovKocDmMnZONzKOABRRUmhTRi_z-a_7YFiY70g9lCRDs6/exec";
+<script>
+  // ✅ Enlaces de tus Apps Script
+  const urlNoticias = "https://script.google.com/macros/s/AKfycbwa1Jr7YBWJRV19SYbmEODovKocDmMnZONzKOABRRUmhTRi_z-a_7YFiY70g9lCRDs6/exec";
+  const urlAmazonAds = "https://script.google.com/macros/s/AKfycbyKj5j7dvcQBiSbN_cVzQ1OYaoEkQ-Lvb7BDIJLjKzYzGVVaa7GJ0RT__TZ6_nOlbLz/exec";
 
-    async function cargarDetalle() {
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("id");
-      const contenedor = document.getElementById("detalleNoticia");
+  // ✅ Cargar detalle de noticia
+  async function cargarDetalle() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    const contenedor = document.getElementById("detalleNoticia");
 
-      if (!id) {
-        contenedor.innerHTML = "<p class='error'>❌ ID de noticia no proporcionado.</p>";
+    if (!id) {
+      contenedor.innerHTML = "<p class='error'>❌ ID de noticia no proporcionado.</p>";
+      return;
+    }
+
+    contenedor.innerHTML = "<p class='cargando'>🌀 Cargando noticia...</p>";
+
+    try {
+      const response = await fetch(`${urlNoticias}?accion=buscarPorId&id=${id}`);
+      const noticia = await response.json();
+
+      if (!noticia || !noticia.titulo) {
+        contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró la noticia solicitada.</p>";
         return;
       }
 
-      contenedor.innerHTML = "<p class='cargando'>🌀 Cargando noticia...</p>";
+      // 🔹 Estructura del detalle
+      contenedor.innerHTML = `
+        <article class="detalle-noticia">
+          <div class="share-container">
+            <button class="btn-share" id="shareFacebook">
+              <i class="fa-brands fa-facebook-f"></i> Compartir en Facebook
+            </button>
+          </div>
+          <p class="categoria">${noticia.categoria?.toUpperCase() || "GENERAL"}</p>
+          <h2>${noticia.titulo}</h2>
+          <p class="descripcion">${noticia.descripcion || ""}</p>
 
-      try {
-        const response = await fetch(`${urlScript}?accion=buscarPorId&id=${id}`);
-        const noticia = await response.json();
+          <div class="meta">
+            <span>Por <strong>${noticia.autor || "Felix Place"}</strong></span> •
+            <span>${noticia.fecha || ""}</span>
+          </div>
 
-        if (!noticia || !noticia.titulo) {
-          contenedor.innerHTML = "<p class='vacio'>⚠️ No se encontró la noticia solicitada.</p>";
-          return;
-        }
+          <img src="${noticia.imagenURL}" alt="${noticia.titulo}" class="imagen-detalle">
 
-        contenedor.innerHTML = `
-          <article class="detalle-noticia">
-            <div class="share-container">
-              <button class="btn-share" id="shareFacebook">
-                <i class="fa-brands fa-facebook-f"></i> Compartir en Facebook
-              </button>
+          <div class="contenido">
+            ${noticia.contenido || ""}
+          </div>
+
+          <!-- 🔹 PUBLICIDAD AMAZON DINÁMICA -->
+          <div class="amazon-ads">
+            <h3 class="amazon-titulo">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" class="amazon-logo">
+  Descubre lo mejor de Amazon 
+</h3>
+            <div class="amazon-grid" id="amazonAds">
+              <p class="cargando">Cargando productos...</p>
             </div>
-            <p class="categoria">${noticia.categoria?.toUpperCase() || "GENERAL"}</p>
-            <h2>${noticia.titulo}</h2>
-            <p class="descripcion">${noticia.descripcion || ""}</p>
+          </div>
+        </article>
+      `;
 
-            <div class="meta">
-              <span>Por <strong>${noticia.autor || "Felix Place"}</strong></span> •
-              <span>${noticia.fecha || ""}</span>
-            </div>
+      actualizarOpenGraph(noticia);
+      cargarAmazonAds(); // 👈 Cargar las publicidades dinámicas
 
-            <img src="${noticia.imagenURL}" alt="${noticia.titulo}" class="imagen-detalle">
-
-            <div class="contenido">
-              ${noticia.contenido || ""}
-            </div>
-          </article>
-        `;
-
-        actualizarOpenGraph(noticia);
-
-      } catch (error) {
-        contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
-        console.error(error);
-      }
+    } catch (error) {
+      contenedor.innerHTML = "<p class='error'>❌ Error al cargar la noticia.</p>";
+      console.error(error);
     }
+  }
 
-    cargarDetalle();
+  // ✅ Cargar las publicidades de Amazon
+  async function cargarAmazonAds() {
+    const adsContainer = document.getElementById("amazonAds");
+    if (!adsContainer) return;
 
-    // 🟦 Compartir noticia en Facebook
-    document.addEventListener("click", function(e) {
-      if (e.target.closest("#shareFacebook")) {
-        const urlActual = window.location.href;
-        const titulo = document.querySelector(".detalle-noticia h2")?.textContent || "Felix Place";
-        const descripcion = document.querySelector(".descripcion")?.textContent || "";
-        const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo + " - " + descripcion)}`;
-        window.open(enlace, "_blank", "width=600,height=500");
+    try {
+      const response = await fetch(`${urlAmazonAds}?accion=obtenerAmazonAds`);
+      const ads = await response.json();
+
+      if (!ads || ads.length === 0 || ads.error) {
+        adsContainer.innerHTML = "<p>No hay recomendaciones disponibles.</p>";
+        console.warn("Error en la respuesta:", ads.error);
+        return;
       }
-    });
 
-    function actualizarOpenGraph(noticia) {
-      document.querySelector("#ogTitle").setAttribute("content", noticia.titulo);
-      document.querySelector("#ogDescription").setAttribute("content", noticia.descripcion);
-      document.querySelector("#ogImage").setAttribute("content", noticia.imagenURL);
-      document.querySelector("#ogUrl").setAttribute("content", window.location.href);
+      adsContainer.innerHTML = ads.map(ad => `
+        <a href="${ad.link}" target="_blank" rel="nofollow noopener sponsored" class="amazon-item">
+          <img src="${ad.imagen}" alt="${ad.titulo}">
+          <span>${ad.titulo}</span>
+        </a>
+      `).join("");
+
+    } catch (error) {
+      console.error("Error al cargar publicidad Amazon:", error);
+      adsContainer.innerHTML = "<p>Error al cargar recomendaciones.</p>";
     }
+  }
 
-    // 🔹 Menú móvil
-    const menuToggle = document.getElementById("menuToggle");
-    const navLinks = document.getElementById("navLinks");
+  // ✅ Cargar la noticia al inicio
+  cargarDetalle();
 
-    menuToggle.addEventListener("click", () => {
-      navLinks.classList.toggle("show");
-    });
-  </script>
+  // ✅ Compartir en Facebook
+  document.addEventListener("click", function(e) {
+    if (e.target.closest("#shareFacebook")) {
+      const urlActual = window.location.href;
+      const titulo = document.querySelector(".detalle-noticia h2")?.textContent || "Felix Place";
+      const descripcion = document.querySelector(".descripcion")?.textContent || "";
+      const enlace = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlActual)}&quote=${encodeURIComponent(titulo + " - " + descripcion)}`;
+      window.open(enlace, "_blank", "width=600,height=500");
+    }
+  });
+
+  // ✅ Actualizar metadatos Open Graph
+  function actualizarOpenGraph(noticia) {
+    document.querySelector("#ogTitle").setAttribute("content", noticia.titulo);
+    document.querySelector("#ogDescription").setAttribute("content", noticia.descripcion);
+    document.querySelector("#ogImage").setAttribute("content", noticia.imagenURL);
+    document.querySelector("#ogUrl").setAttribute("content", window.location.href);
+  }
+
+  // ✅ Menú móvil
+  const menuToggle = document.getElementById("menuToggle");
+  const navLinks = document.getElementById("navLinks");
+  menuToggle.addEventListener("click", () => navLinks.classList.toggle("show"));
+</script>
+
 </body>
 </html>

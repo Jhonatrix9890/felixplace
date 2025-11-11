@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- 🔹 Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7838540041490564"
      crossorigin="anonymous"></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Felix Place - Detalle del tutorial tecnológico." />
@@ -11,6 +13,7 @@
   <!-- 🔹 Estilos -->
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/tutoriales.css" />
+  <link rel="stylesheet" href="css/noticias.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="icon" type="image/png" href="assets/favicon.ico" />
@@ -73,8 +76,11 @@
 
   <!-- 🔹 SCRIPT -->
   <script>
+    // ✅ Endpoints
     const urlAPI = "https://script.google.com/macros/s/AKfycbxHNB59r3Z56tT4ZICaXEE5Bf7a0_yqc2zS62gfIab3Ngo_TXzYZPV2yEBUKvIsstTipw/exec";
+    const urlAmazonAds = "https://script.google.com/macros/s/AKfycbyKj5j7dvcQBiSbN_cVzQ1OYaoEkQ-Lvb7BDIJLjKzYzGVVaa7GJ0RT__TZ6_nOlbLz/exec";
 
+    // ✅ Cargar detalle del tutorial
     async function cargarDetalle() {
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id");
@@ -100,6 +106,7 @@
         const duracion = tutorial.duracion && tutorial.duracion !== "Invalid Date" ? tutorial.duracion : "—";
         const fecha = tutorial.fecha ? new Date(tutorial.fecha).toLocaleDateString("es-ES") : "";
 
+        // 🔹 Estructura con sección Amazon
         contenedor.innerHTML = `
           <article class="detalle-tutorial">
             <h2>${tutorial.titulo}</h2>
@@ -123,19 +130,63 @@
             </div>
 
             <p class="fecha-publicacion">📅 Publicado el: ${fecha}</p>
+
+            <!-- 🔹 PUBLICIDAD AMAZON DINÁMICA -->
+            <div class="amazon-ads">
+              <h3 class="amazon-titulo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" class="amazon-logo">
+                Descubre lo mejor de Amazon 
+              </h3>
+              <div class="amazon-grid" id="amazonAds">
+                <p class="cargando">Cargando productos...</p>
+              </div>
+            </div>
           </article>
         `;
+
+        cargarAmazonAds();
+
       } catch (error) {
         contenedor.innerHTML = "<p class='error'>❌ Error al cargar el tutorial.</p>";
         console.error(error);
       }
     }
 
+    // ✅ Cargar publicidad Amazon
+    async function cargarAmazonAds() {
+      const adsContainer = document.getElementById("amazonAds");
+      if (!adsContainer) return;
+
+      try {
+        const response = await fetch(`${urlAmazonAds}?accion=obtenerAmazonAds`);
+        const ads = await response.json();
+
+        if (!ads || ads.length === 0 || ads.error) {
+          adsContainer.innerHTML = "<p>No hay recomendaciones disponibles.</p>";
+          console.warn("Error en la respuesta:", ads.error);
+          return;
+        }
+
+        adsContainer.innerHTML = ads.map(ad => `
+          <a href="${ad.link}" target="_blank" rel="nofollow noopener sponsored" class="amazon-item">
+            <img src="${ad.imagen}" alt="${ad.titulo}">
+            <span>${ad.titulo}</span>
+          </a>
+        `).join("");
+
+      } catch (error) {
+        console.error("Error al cargar publicidad Amazon:", error);
+        adsContainer.innerHTML = "<p>Error al cargar recomendaciones.</p>";
+      }
+    }
+
+    // ✅ Extraer ID de YouTube
     function extraerID(url) {
       const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&]|$)/);
       return match ? match[1] : "";
     }
 
+    // ✅ Formatear texto
     function formatearTexto(texto) {
       return texto
         .split("\n")
@@ -143,14 +194,12 @@
         .join("");
     }
 
-    // 🔹 Menú móvil
+    // ✅ Menú móvil
     const menuToggle = document.getElementById("menuToggle");
     const navLinks = document.getElementById("navLinks");
+    menuToggle.addEventListener("click", () => navLinks.classList.toggle("show"));
 
-    menuToggle.addEventListener("click", () => {
-      navLinks.classList.toggle("show");
-    });
-
+    // ✅ Cargar al inicio
     cargarDetalle();
   </script>
 

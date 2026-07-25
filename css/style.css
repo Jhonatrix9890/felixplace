@@ -443,3 +443,206 @@ html, body {
     height: 120px;
   }
 }
+
+
+/* nuevos estilos */
+
+/* ===================================
+   FOOTER PRINCIPAL - FELIX PLACE
+=================================== */
+
+.footer-principal {
+  padding: 65px 20px 25px;
+  background: #001f3f;
+  color: #d9edf5;
+}
+
+.footer-contenedor {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 1fr;
+  gap: 45px;
+  padding-bottom: 45px;
+}
+
+.footer-marca {
+  max-width: 360px;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: white;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.footer-logo img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.footer-marca p {
+  margin: 0 0 22px;
+  color: #b8d0dc;
+  font-size: 0.94rem;
+  line-height: 1.8;
+}
+
+.footer-redes {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-redes a {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(0, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #00ffff;
+  font-size: 1.05rem;
+  text-decoration: none;
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.footer-redes a:hover {
+  transform: translateY(-4px);
+  border-color: #00ffff;
+  background: rgba(0, 255, 255, 0.12);
+}
+
+.footer-columna h2 {
+  margin: 0 0 20px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.footer-enlaces {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-enlaces li {
+  margin-bottom: 11px;
+}
+
+.footer-enlaces a {
+  color: #b8d0dc;
+  font-size: 0.91rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition:
+    color 0.25s ease,
+    padding-left 0.25s ease;
+}
+
+.footer-enlaces a:hover {
+  padding-left: 4px;
+  color: #00ffff;
+}
+
+.footer-contacto {
+  margin-bottom: 20px;
+}
+
+.footer-contacto a {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #b8d0dc;
+  font-size: 0.91rem;
+  line-height: 1.6;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.footer-contacto a:hover {
+  color: #00ffff;
+}
+
+.footer-contacto i {
+  margin-top: 4px;
+  color: #00ffff;
+}
+
+.footer-mensaje {
+  padding: 14px;
+  border-left: 3px solid #00ffff;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.footer-mensaje p {
+  margin: 0;
+  color: #b8d0dc;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.footer-inferior {
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-inferior p {
+  margin: 0;
+  color: #91aeba;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.footer-inferior a {
+  color: #b8d0dc;
+  text-decoration: none;
+}
+
+.footer-inferior a:hover {
+  color: #00ffff;
+}
+
+/* RESPONSIVE DEL FOOTER */
+
+@media (max-width: 950px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+  .footer-principal {
+    padding: 50px 20px 22px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .footer-marca {
+    max-width: 100%;
+  }
+
+  .footer-inferior {
+    flex-direction: column;
+    text-align: center;
+  }
+}

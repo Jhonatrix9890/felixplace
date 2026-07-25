@@ -7,34 +7,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
 <!-- 🔹 SEO Felix Place - Noticias -->
-          <title>Noticias Tecnológicas | Felix Place</title>
-          <meta name="description" content="Entérate de las últimas noticias sobre inteligencia artificial, startups, gadgets y avances tecnológicos con Felix Place.">
-          <meta name="keywords" content="noticias tecnológicas, inteligencia artificial, startups, gadgets, innovación, Felix Place">
-          <meta name="author" content="Felix Place">
-          <meta name="robots" content="index, follow">
-          <link rel="canonical" href="https://felixplace.com/noticias.html">
+          <title>Noticias de tecnología y actualidad digital | Felix Place</title>
 
-          <!-- 🧩 Open Graph -->
-          <meta property="og:title" content="Noticias Tecnológicas | Felix Place">
-          <meta property="og:description" content="Descubre lo más reciente en tecnología, IA y ciencia con Felix Place.">
-          <meta property="og:image" content="https://felixplace.com/assets/banner_noticias">
-          <meta property="og:url" content="https://felixplace.com/noticias.html">
-          <meta property="og:type" content="article">
+<meta
+  name="description"
+  content="Consulta noticias de tecnología, aplicaciones, inteligencia artificial, seguridad y actualidad digital en Felix Place."
+>
 
+<meta name="author" content="Felix Place">
+<meta name="robots" content="index, follow">
+
+<link
+  rel="canonical"
+  href="https://felixplace.com/noticias.html"
+>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_EC">
+<meta property="og:site_name" content="Felix Place">
+
+<meta
+  property="og:title"
+  content="Noticias de tecnología y actualidad digital | Felix Place"
+>
+
+<meta
+  property="og:description"
+  content="Noticias sobre tecnología, aplicaciones, inteligencia artificial, seguridad y actualidad digital."
+>
+
+<meta
+  property="og:url"
+  content="https://felixplace.com/noticias.html"
+>
+
+<meta
+  property="og:image"
+  content="https://felixplace.com/assets/banner.png"
+>
+
+<meta
+  property="og:image:alt"
+  content="Noticias de tecnología publicadas en Felix Place"
+>
+
+<!-- Twitter/X -->
+<meta name="twitter:card" content="summary_large_image">
+
+<meta
+  name="twitter:title"
+  content="Noticias de tecnología y actualidad digital | Felix Place"
+>
+
+<meta
+  name="twitter:description"
+  content="Noticias sobre tecnología, aplicaciones, inteligencia artificial, seguridad y actualidad digital."
+>
+
+<meta
+  name="twitter:image"
+  content="https://felixplace.com/assets/banner.png"
+>
           <!-- 🧠 JSON-LD Estructurado -->
-          <script type="application/ld+json">
-          {
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            "name": "Noticias Tecnológicas | Felix Place",
-            "url": "https://felixplace.com/noticias.html",
-            "description": "Últimas noticias tecnológicas, IA, ciencia y gadgets.",
-            "publisher": {
-              "@type": "Organization",
-              "name": "Felix Place"
-            }
-          }
-          </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Noticias de tecnología",
+  "description": "Noticias sobre tecnología, aplicaciones, inteligencia artificial, seguridad y actualidad digital.",
+  "url": "https://felixplace.com/noticias.html",
+  "inLanguage": "es-EC",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Felix Place",
+    "url": "https://felixplace.com/"
+  }
+}
+</script>
 
 
   <!-- 🔹 Estilos -->
@@ -300,7 +350,7 @@
         document.getElementById("paginacion").style.display = "block";
         contenedor.innerHTML = noticias.map(noticia => `
           <div class="noticia-card">
-            <img src="${noticia.imagenURL}" alt="${noticia.titulo}">
+            <img src="${noticia.imagenURL}" alt="${noticia.titulo}" loading="lazy"  decoding="async">
             <div class="noticia-info">
               <h3>${noticia.titulo}</h3>
               <p>${noticia.descripcion.substring(0, 150)}...</p>

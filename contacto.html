@@ -69,19 +69,37 @@
       <span>Felix Place</span>
     </a>
 
-    <i
-      class="fa-solid fa-bars menu-toggle"
+    <button
+      class="menu-toggle"
       id="menuToggle"
-      aria-label="Abrir menú"
-    ></i>
+      type="button"
+      aria-label="Abrir menú de navegación"
+      aria-controls="navLinks"
+      aria-expanded="false"
+    >
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
 
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Inicio</a>
-      <a href="noticias.html">Noticias</a>
-      <a href="tutoriales.html">Tutoriales</a>
-      <a href="sugerencias.html">Sugerencias</a>
-      <a href="acerca-de.html">Acerca de</a>
-      <a href="contacto.html" class="active">Contacto</a>
+    <nav class="nav-links" id="navLinks" aria-label="Navegación principal">
+    <a href="index.html" data-page="inicio">
+        Inicio
+    </a>
+
+    <a href="noticias.html" data-page="noticias">
+        Noticias
+    </a>
+
+    <a href="tutoriales.html" data-page="tutoriales">
+        Tutoriales
+    </a>
+
+    <a href="acerca-de.html" data-page="acerca">
+        Acerca de
+    </a>
+
+    <a href="contacto.html" data-page="contacto">
+        Contacto
+    </a>
     </nav>
   </header>
 
@@ -503,11 +521,9 @@
     const menuToggle = document.getElementById("menuToggle");
     const navLinks = document.getElementById("navLinks");
 
-    if (menuToggle && navLinks) {
-      menuToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("active");
-      });
-    }
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+    }); 
 
     const formContacto = document.getElementById("formContacto");
     const btnEnviar = document.getElementById("btnEnviar");
@@ -537,6 +553,45 @@
           '<i class="fa-solid fa-paper-plane"></i> Enviar mensaje';
       }, 800);
     });
+
+    const elementosAnio = document.querySelectorAll(".anio-actual");
+
+elementosAnio.forEach((elemento) => {
+  elemento.textContent = new Date().getFullYear();
+});
+
+
+const paginaActual = window.location.pathname
+  .split("/")
+  .pop()
+  .toLowerCase();
+
+const enlacesNavegacion = document.querySelectorAll(
+  ".nav-links a[data-page]"
+);
+
+const mapaPaginas = {
+  "": "inicio",
+  "index.html": "inicio",
+  "noticias.html": "noticias",
+  "detalle.html": "noticias",
+  "tutoriales.html": "tutoriales",
+  "acerca-de.html": "acerca",
+  "contacto.html": "contacto",
+  "sugerencias.html": "contacto",
+  "politica-privacidad.html": "",
+  "politica-cookies.html": "",
+  "terminos-condiciones.html": ""
+};
+
+const seccionActual = mapaPaginas[paginaActual];
+
+enlacesNavegacion.forEach((enlace) => {
+  if (enlace.dataset.page === seccionActual) {
+    enlace.classList.add("active");
+    enlace.setAttribute("aria-current", "page");
+  }
+});
   </script>
 
 </body>

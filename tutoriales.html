@@ -56,15 +56,38 @@
     </a>
 
     <!-- Menú hamburguesa (solo móvil) -->
-    <i class="fa-solid fa-bars menu-toggle" id="menuToggle"></i>
+          <button
+        class="menu-toggle"
+        id="menuToggle"
+        type="button"
+        aria-label="Abrir menú de navegación"
+        aria-controls="navLinks"
+        aria-expanded="false"
+      >
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+      </button>
 
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Inicio</a>
-      <a href="noticias.html">Noticias</a>
-      <a href="tutoriales.html" class="active">Tutoriales</a>
-      <a href="sugerencias.html">Sugerencias</a>
-      <a href="#" class="search"><i class="fa fa-search"></i></a>
-    </nav>
+          <nav class="nav-links" id="navLinks" aria-label="Navegación principal">
+          <a href="index.html" data-page="inicio">
+              Inicio
+          </a>
+
+          <a href="noticias.html" data-page="noticias">
+              Noticias
+          </a>
+
+          <a href="tutoriales.html" data-page="tutoriales">
+              Tutoriales
+          </a>
+
+          <a href="acerca-de.html" data-page="acerca">
+              Acerca de
+          </a>
+
+          <a href="contacto.html" data-page="contacto">
+              Contacto
+          </a>
+          </nav>
   </header>
 
   <!-- 🔹 HERO -->
@@ -245,7 +268,6 @@
   <script>
     const urlAPI = "https://script.google.com/macros/s/AKfycbxHNB59r3Z56tT4ZICaXEE5Bf7a0_yqc2zS62gfIab3Ngo_TXzYZPV2yEBUKvIsstTipw/exec";
 
-    let paginaActual = 1;
     const tamanoPagina = 9;
     let modoBusqueda = false;
     let textoBusqueda = "";
@@ -352,6 +374,39 @@
 
 elementosAnio.forEach((elemento) => {
   elemento.textContent = new Date().getFullYear();
+});
+
+
+const paginaActual = window.location.pathname
+  .split("/")
+  .pop()
+  .toLowerCase();
+
+const enlacesNavegacion = document.querySelectorAll(
+  ".nav-links a[data-page]"
+);
+
+const mapaPaginas = {
+  "": "inicio",
+  "index.html": "inicio",
+  "noticias.html": "noticias",
+  "detalle.html": "noticias",
+  "tutoriales.html": "tutoriales",
+  "acerca-de.html": "acerca",
+  "contacto.html": "contacto",
+  "sugerencias.html": "contacto",
+  "politica-privacidad.html": "",
+  "politica-cookies.html": "",
+  "terminos-condiciones.html": ""
+};
+
+const seccionActual = mapaPaginas[paginaActual];
+
+enlacesNavegacion.forEach((enlace) => {
+  if (enlace.dataset.page === seccionActual) {
+    enlace.classList.add("active");
+    enlace.setAttribute("aria-current", "page");
+  }
 });
   </script>
 </body>

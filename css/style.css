@@ -646,3 +646,52 @@ html, body {
     text-align: center;
   }
 }
+
+
+/* ===================================
+   NAVEGACIÓN PRINCIPAL
+=================================== */
+
+.nav-links a {
+  position: relative;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 0;
+  height: 2px;
+  border-radius: 10px;
+  background: #00ffff;
+  transform: translateX(-50%);
+  transition: width 0.25s ease;
+}
+
+.nav-links a:hover::after,
+.nav-links a.active::after {
+  width: 100%;
+}
+
+.nav-links a.active {
+  color: #00ffff;
+  font-weight: 600;
+}
+
+/* BOTÓN DEL MENÚ MÓVIL */
+
+button.menu-toggle {
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.menu-toggle:focus-visible {
+  outline: 2px solid #00ffff;
+  outline-offset: 4px;
+  border-radius: 5px;
+}

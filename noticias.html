@@ -98,23 +98,150 @@
   </div>
 
   <!-- 🔹 FOOTER -->
-  <footer class="footer">
-    <div class="redes-footer">
-      <a href="#"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@felixplace13"><i class="fa-brands fa-tiktok"></i></a>
-      <a href="https://www.facebook.com/felixplace13"><i class="fa-brands fa-facebook-f"></i></a>
-      <a href="https://www.youtube.com/@felixplace2947"><i class="fa-brands fa-youtube"></i></a>
+<footer class="footer-principal">
+  <div class="footer-contenedor">
+
+    <div class="footer-grid">
+
+      <!-- MARCA -->
+      <div class="footer-marca">
+        <a href="index.html" class="footer-logo">
+          <img
+            src="assets/logo.png"
+            alt="Logo de Felix Place"
+          >
+
+          <span>Felix Place</span>
+        </a>
+
+        <p>
+          Noticias, tutoriales y recursos tecnológicos explicados de
+          manera sencilla para ayudarte a aprender, descubrir y
+          desenvolverte mejor en el mundo digital.
+        </p>
+
+        <div class="footer-redes">
+          <a
+            href="https://www.tiktok.com/@felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok de Felix Place"
+            title="TikTok"
+          >
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+
+          <a
+            href="https://www.facebook.com/felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook de Felix Place"
+            title="Facebook"
+          >
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+
+          <a
+            href="https://www.youtube.com/@felixplace2947"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube de Felix Place"
+            title="YouTube"
+          >
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- NAVEGACIÓN -->
+      <div class="footer-columna">
+        <h2>Explorar</h2>
+
+        <ul class="footer-enlaces">
+          <li>
+            <a href="index.html">Inicio</a>
+          </li>
+
+          <li>
+            <a href="noticias.html">Noticias</a>
+          </li>
+
+          <li>
+            <a href="tutoriales.html">Tutoriales</a>
+          </li>
+
+          <li>
+            <a href="acerca-de.html">Acerca de</a>
+          </li>
+
+          <li>
+            <a href="contacto.html">Contacto</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- LEGAL -->
+      <div class="footer-columna">
+        <h2>Información legal</h2>
+
+        <ul class="footer-enlaces">
+          <li>
+            <a href="politica-privacidad.html">
+              Política de Privacidad
+            </a>
+          </li>
+
+          <li>
+            <a href="politica-cookies.html">
+              Política de Cookies
+            </a>
+          </li>
+
+          <li>
+            <a href="terminos-condiciones.html">
+              Términos y Condiciones
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CONTACTO -->
+      <div class="footer-columna">
+        <h2>Contacto</h2>
+
+        <div class="footer-contacto">
+          <a href="mailto:felixplace13@gmail.com">
+            <i class="fa-solid fa-envelope"></i>
+
+            <span>felixplace13@gmail.com</span>
+          </a>
+        </div>
+
+        <div class="footer-mensaje">
+          <p>
+            ¿Encontraste un error o tienes una idea para un nuevo
+            tutorial? Envíanos un mensaje desde nuestra página de
+            contacto.
+          </p>
+        </div>
+      </div>
+
     </div>
 
-    <div class="footer-text">
-      <h3>Felix Place</h3>
+    <!-- PARTE INFERIOR -->
+    <div class="footer-inferior">
       <p>
-        Felix Place es un espacio digital dedicado a descubrir y compartir lo mejor del mundo tecnológico:
-        curiosidades, tendencias, innovación y herramientas digitales que transforman la forma en que vivimos y trabajamos.
+        © <span class="anio-actual">2026</span> Felix Place.
+        Todos los derechos reservados.
       </p>
-      <p class="copy">© FELIXPLACE 2025 TODOS LOS DERECHOS RESERVADOS</p>
+
+      <p>
+        Contenido tecnológico creado desde Ecuador.
+      </p>
     </div>
-  </footer>
+
+  </div>
+</footer>
 
   <!-- 🔹 SCRIPT -->
   <script>
@@ -207,6 +334,12 @@
     menuToggle.addEventListener("click", () => {
       navLinks.classList.toggle("show");
     });
+
+    const elementosAnio = document.querySelectorAll(".anio-actual");
+
+elementosAnio.forEach((elemento) => {
+  elemento.textContent = new Date().getFullYear();
+});
   </script>
 </body>
 </html>

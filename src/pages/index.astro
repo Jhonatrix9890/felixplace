@@ -1,0 +1,64 @@
+---
+const titulo = 'FelixPlace | Tecnología para todos';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content="Noticias, tutoriales y cursos de tecnología en FelixPlace." />
+    <title>{titulo}</title>
+  </head>
+
+  <body>
+    <main>
+      <p class="marca">FELIXPLACE</p>
+      <h1>Una nueva etapa comienza</h1>
+      <p>
+        Estamos preparando noticias, tutoriales y cursos de tecnología.
+      </p>
+    </main>
+        <script>
+      import { handleAuthCallback } from '@netlify/identity';
+
+      handleAuthCallback()
+        .then((result) => {
+          if (result) {
+            window.location.replace('/admin/login');
+          }
+        })
+        .catch((error) => {
+          console.error('No se pudo procesar el enlace de invitación:', error);
+        });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #f4f7fb;
+    color: #172033;
+    font-family: Arial, sans-serif;
+  }
+
+  main {
+    max-width: 650px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .marca {
+    color: #1769aa;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+  }
+</style>

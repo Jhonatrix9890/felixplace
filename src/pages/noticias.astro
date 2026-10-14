@@ -1,0 +1,89 @@
+---
+export const prerender = false;
+
+import { getDatabase } from '@netlify/database';
+
+const db = getDatabase();
+
+const posts = await db.sql`
+  SELECT kind, title, slug, category, image_url, image_alt, description, author_name
+  FROM posts
+  WHERE status = 'published'
+  ORDER BY published_at DESC NULLS LAST, created_at DESC
+  LIMIT 12
+`;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Noticias y tutoriales | FelixPlace</title>
+    <meta
+      name="description"
+      content="Noticias y tutoriales de tecnología publicados en FelixPlace."
+    />
+  </head>
+
+  <body>
+    <main>
+      <h1>Noticias y tutoriales</h1>
+      <p>Contenido reciente de FelixPlace.</p>
+
+      {posts.length === 0 ? (
+        <p>Aún no hay publicaciones. Pronto encontrarás contenido aquí.</p>
+      ) : (
+        <section class="grid">
+          {posts.map((post) => (
+            <article class="card">
+              {post.image_url && (
+                <img src={post.image_url} alt={post.image_alt || post.title} />
+              )}
+              <p>{post.category} · {post.kind}</p>
+             <h2>
+                <a href={`/noticias/${post.slug}`}>{post.title}</a>
+             </h2>
+              <p>{post.description}</p>
+              <small>Por {post.author_name} · Slug: {post.slug}</small>
+            </article>
+          ))}
+        </section>
+      )}
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem;
+    color: #172033;
+    font-family: system-ui, sans-serif;
+    background: #f4f6fa;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 4px 18px #17203312;
+  }
+
+  .card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+</style>

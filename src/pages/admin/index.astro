@@ -1,0 +1,86 @@
+---
+import { getUser } from '@netlify/identity';
+
+export const prerender = false;
+
+const user = await getUser();
+
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+if (!(user.roles ?? []).includes('admin')) {
+  return new Response('Tu cuenta todavía no tiene el rol de administrador.', {
+    status: 403,
+  });
+}
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Administración | FelixPlace</title>
+  </head>
+
+  <body>
+    <main class="panel">
+      <p class="marca">FELIXPLACE</p>
+      <h1>Panel de administración</h1>
+      <p>Sesión iniciada como <strong>{user.email}</strong></p>
+      <p>El acceso fue validado correctamente.</p>
+      <button id="logout-button" type="button">Cerrar sesión</button>
+    </main>
+
+    <script>
+      import { logout } from '@netlify/identity';
+
+      document.querySelector('#logout-button')?.addEventListener('click', async () => {
+        await logout();
+        window.location.href = '/admin/login';
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: #f3f5f8;
+    color: #172033;
+    font-family: Arial, sans-serif;
+  }
+
+  .panel {
+    width: min(100%, 650px);
+    padding: 36px;
+    border: 1px solid #e4e8ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 45px rgb(20 35 60 / 10%);
+  }
+
+  .marca {
+    color: #1769aa;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  button {
+    margin-top: 16px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>

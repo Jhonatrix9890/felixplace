@@ -1,0 +1,36 @@
+{
+  "name": "felixplace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jhonatrix9890/felixplace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jhonatrix9890/felixplace/issues"
+  },
+  "homepage": "https://github.com/Jhonatrix9890/felixplace#readme",
+  "dependencies": {
+    "@astrojs/netlify": "^8.2.9",
+    "@netlify/blobs": "^11.1.4",
+    "@netlify/database": "^2.0.1",
+    "@netlify/identity": "^2.0.0",
+    "astro": "^7.3.8",
+    "marked": "^18.1.1",
+    "sanitize-html": "^2.18.0"
+  }
+}

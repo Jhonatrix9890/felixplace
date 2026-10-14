@@ -1,6 +1,7 @@
 ---
 import { getUser } from '@netlify/identity';
 import { getDatabase } from '@netlify/database';
+import { actions } from 'astro:actions';
 
 export const prerender = false;
 
@@ -15,6 +16,8 @@ if (!(user.roles ?? []).includes('admin')) {
     status: 403,
   });
 }
+
+const publishResult = Astro.getActionResult(actions.publishPost);
 
 type PostRow = {
   id: string;
@@ -94,6 +97,18 @@ const estadoPublicacion = (status: string) => {
           <a class="accion" href="/admin/nueva">Nueva publicación</a>
         </div>
 
+        {publishResult && !publishResult.error && (
+          <p class="mensaje-exito" aria-live="polite">
+            Publicada: {publishResult.data.title}
+          </p>
+        )}
+
+        {publishResult?.error && (
+          <p class="mensaje-error" aria-live="polite">
+            No se pudo publicar. Revisa el borrador.
+          </p>
+        )}
+
         {errorMessage ? (
           <p class="aviso error">
             No se pudieron cargar las publicaciones: {errorMessage}
@@ -106,13 +121,24 @@ const estadoPublicacion = (status: string) => {
           <div class="lista">
             {posts.map((post) => (
               <article class="publicacion">
-                <div>
+                <div class="datos-publicacion">
                   <span class="tipo">{tipoPublicacion(post.kind)}</span>
                   <h3>{post.title}</h3>
                   <p class="slug">/{post.slug}</p>
                 </div>
 
-                <span class="estado">{estadoPublicacion(post.status)}</span>
+                <div class="acciones-publicacion">
+                  <span class="estado">{estadoPublicacion(post.status)}</span>
+
+                  {(post.status === 'draft' || post.status === 'review') && (
+                    <form method="POST" action={actions.publishPost}>
+                      <input type="hidden" name="id" value={post.id} />
+                      <button class="boton-publicar" type="submit">
+                        Publicar
+                      </button>
+                    </form>
+                  )}
+                </div>
               </article>
             ))}
           </div>
@@ -245,6 +271,16 @@ const estadoPublicacion = (status: string) => {
     margin: 8px 0 4px;
   }
 
+  .datos-publicacion {
+    min-width: 0;
+  }
+
+  .acciones-publicacion {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .tipo,
   .estado {
     display: inline-block;
@@ -262,20 +298,42 @@ const estadoPublicacion = (status: string) => {
     white-space: nowrap;
   }
 
+  .boton-publicar {
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 7px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
   .slug {
     margin-bottom: 0;
     overflow-wrap: anywhere;
   }
 
-  .aviso {
+  .aviso,
+  .mensaje-exito,
+  .mensaje-error {
     padding: 16px;
     border-radius: 8px;
+  }
+
+  .aviso {
     background: #f3f6fa;
   }
 
-  .error {
+  .error,
+  .mensaje-error {
     background: #fff1f0;
     color: #9b2525;
+  }
+
+  .mensaje-exito {
+    background: #eaf7ee;
+    color: #176b35;
   }
 
   @media (max-width: 640px) {
@@ -284,13 +342,11 @@ const estadoPublicacion = (status: string) => {
     }
 
     .encabezado,
-    .titulo-seccion {
+    .titulo-seccion,
+    .publicacion,
+    .acciones-publicacion {
       align-items: flex-start;
       flex-direction: column;
-    }
-
-    .publicacion {
-      align-items: flex-start;
     }
   }
 </style>

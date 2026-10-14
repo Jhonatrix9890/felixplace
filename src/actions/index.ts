@@ -3,6 +3,7 @@ import { z } from 'astro/zod';
 import { getUser } from '@netlify/identity';
 import { getDatabase } from '@netlify/database';
 
+
 const slugValido = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 const textoOpcional = (max: number) =>
@@ -116,6 +117,54 @@ export const server = {
       `;
 
       return { id: post.id, slug: post.slug };
+    },
+  }),
+
+  publishPost: defineAction({
+    accept: 'form',
+
+    input: z.object({
+      id: z.string().uuid(),
+    }),
+
+    handler: async ({ id }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para publicar.',
+        });
+      }
+
+      if (!user.roles?.includes('admin')) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Tu cuenta no tiene permiso para publicar.',
+        });
+      }
+
+      const db = getDatabase();
+
+      const [post] = await db.sql<{ id: string; title: string }>`
+        UPDATE posts
+        SET
+          status = 'published',
+          published_at = COALESCE(published_at, NOW()),
+          updated_at = NOW()
+        WHERE id = ${id}
+          AND status IN ('draft', 'review')
+        RETURNING id, title
+      `;
+
+      if (!post) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró el borrador o ya fue publicado.',
+        });
+      }
+
+      return { id: post.id, title: post.title };
     },
   }),
 };

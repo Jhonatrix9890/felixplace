@@ -17,8 +17,6 @@ if (!(user.roles ?? []).includes('admin')) {
   });
 }
 
-const publishResult = Astro.getActionResult(actions.publishPost);
-
 type PostRow = {
   id: string;
   kind: 'news' | 'tutorial';
@@ -27,7 +25,32 @@ type PostRow = {
   status: string;
 };
 
+type PendingComment = {
+  id: string;
+  post_id: string;
+  post_title: string;
+  display_name: string;
+  body: string;
+};
+
+const publishResult = Astro.getActionResult(actions.publishPost);
+const moderationResult = Astro.getActionResult(actions.moderateComment);
+
+const actionError =
+  publishResult?.error?.message ?? moderationResult?.error?.message;
+
+const publishMessage = publishResult?.data
+  ? 'La publicación fue publicada correctamente.'
+  : '';
+
+const moderationMessage = moderationResult?.data
+  ? moderationResult.data.status === 'approved'
+    ? 'El comentario fue aprobado.'
+    : 'El comentario fue rechazado.'
+  : '';
+
 let posts: PostRow[] = [];
+let pendingComments: PendingComment[] = [];
 let errorMessage = '';
 
 try {
@@ -39,11 +62,25 @@ try {
     ORDER BY updated_at DESC
     LIMIT 50
   `) as unknown as PostRow[];
+
+  pendingComments = (await db.sql`
+    SELECT
+      comments.id,
+      comments.post_id,
+      posts.title AS post_title,
+      comments.display_name,
+      comments.body
+    FROM comments
+    INNER JOIN posts ON posts.id = comments.post_id
+    WHERE comments.status = 'pending'
+    ORDER BY comments.created_at ASC
+    LIMIT 100
+  `) as unknown as PendingComment[];
 } catch (error) {
   errorMessage =
     error instanceof Error
       ? error.message
-      : 'No se pudieron cargar las publicaciones.';
+      : 'No se pudieron cargar los datos del panel.';
 }
 
 const tipoPublicacion = (kind: PostRow['kind']) =>
@@ -87,7 +124,64 @@ const estadoPublicacion = (status: string) => {
         </button>
       </header>
 
-      <section class="publicaciones">
+      {actionError && <p class="aviso error">{actionError}</p>}
+      {publishMessage && <p class="aviso">{publishMessage}</p>}
+      {moderationMessage && <p class="aviso">{moderationMessage}</p>}
+
+      <section class="seccion">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Comentarios pendientes</h2>
+            <p>Aprueba los comentarios para que aparezcan en la página.</p>
+          </div>
+        </div>
+
+        {errorMessage ? (
+          <p class="aviso error">
+            No se pudieron cargar los datos: {errorMessage}
+          </p>
+        ) : pendingComments.length === 0 ? (
+          <p class="aviso">No hay comentarios pendientes de revisión.</p>
+        ) : (
+          <div class="lista">
+            {pendingComments.map((comment) => (
+              <article class="comentario">
+                <div>
+                  <p class="autor">{comment.display_name}</p>
+                  <p class="sobre">
+                    Comentó en: <strong>{comment.post_title}</strong>
+                  </p>
+                  <p class="texto-comentario">{comment.body}</p>
+                </div>
+
+                <div class="botones-comentario">
+                  <form method="POST" action={actions.moderateComment}>
+                    <input
+                      type="hidden"
+                      name="comment_id"
+                      value={comment.id}
+                    />
+                    <input type="hidden" name="status" value="approved" />
+                    <button class="aprobar" type="submit">Aprobar</button>
+                  </form>
+
+                  <form method="POST" action={actions.moderateComment}>
+                    <input
+                      type="hidden"
+                      name="comment_id"
+                      value={comment.id}
+                    />
+                    <input type="hidden" name="status" value="rejected" />
+                    <button class="rechazar" type="submit">Rechazar</button>
+                  </form>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="seccion publicaciones">
         <div class="titulo-seccion">
           <div>
             <h2>Publicaciones</h2>
@@ -96,18 +190,6 @@ const estadoPublicacion = (status: string) => {
 
           <a class="accion" href="/admin/nueva">Nueva publicación</a>
         </div>
-
-        {publishResult && !publishResult.error && (
-          <p class="mensaje-exito" aria-live="polite">
-            Publicada: {publishResult.data.title}
-          </p>
-        )}
-
-        {publishResult?.error && (
-          <p class="mensaje-error" aria-live="polite">
-            No se pudo publicar. Revisa el borrador.
-          </p>
-        )}
 
         {errorMessage ? (
           <p class="aviso error">
@@ -121,7 +203,7 @@ const estadoPublicacion = (status: string) => {
           <div class="lista">
             {posts.map((post) => (
               <article class="publicacion">
-                <div class="datos-publicacion">
+                <div>
                   <span class="tipo">{tipoPublicacion(post.kind)}</span>
                   <h3>{post.title}</h3>
                   <p class="slug">/{post.slug}</p>
@@ -133,9 +215,7 @@ const estadoPublicacion = (status: string) => {
                   {(post.status === 'draft' || post.status === 'review') && (
                     <form method="POST" action={actions.publishPost}>
                       <input type="hidden" name="id" value={post.id} />
-                      <button class="boton-publicar" type="submit">
-                        Publicar
-                      </button>
+                      <button class="aprobar" type="submit">Publicar</button>
                     </form>
                   )}
                 </div>
@@ -181,7 +261,8 @@ const estadoPublicacion = (status: string) => {
 
   .encabezado,
   .titulo-seccion,
-  .publicacion {
+  .publicacion,
+  .comentario {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -213,7 +294,8 @@ const estadoPublicacion = (status: string) => {
 
   .sesion,
   .titulo-seccion p,
-  .slug {
+  .slug,
+  .sobre {
     color: #647084;
   }
 
@@ -221,7 +303,7 @@ const estadoPublicacion = (status: string) => {
     margin-bottom: 0;
   }
 
-  .publicaciones {
+  .seccion {
     padding-top: 24px;
   }
 
@@ -238,9 +320,9 @@ const estadoPublicacion = (status: string) => {
   }
 
   .accion,
-  .secundario {
+  button {
     display: inline-block;
-    padding: 12px 16px;
+    padding: 11px 15px;
     border: 0;
     border-radius: 8px;
     background: #1769aa;
@@ -256,12 +338,21 @@ const estadoPublicacion = (status: string) => {
     color: #172033;
   }
 
+  .aprobar {
+    background: #1769aa;
+  }
+
+  .rechazar {
+    background: #a83232;
+  }
+
   .lista {
     display: grid;
     gap: 12px;
   }
 
-  .publicacion {
+  .publicacion,
+  .comentario {
     padding: 18px;
     border: 1px solid #e4e8ef;
     border-radius: 10px;
@@ -269,16 +360,6 @@ const estadoPublicacion = (status: string) => {
 
   .publicacion h3 {
     margin: 8px 0 4px;
-  }
-
-  .datos-publicacion {
-    min-width: 0;
-  }
-
-  .acciones-publicacion {
-    display: flex;
-    align-items: center;
-    gap: 10px;
   }
 
   .tipo,
@@ -298,42 +379,43 @@ const estadoPublicacion = (status: string) => {
     white-space: nowrap;
   }
 
-  .boton-publicar {
-    padding: 9px 13px;
-    border: 0;
-    border-radius: 7px;
-    background: #1769aa;
-    color: #fff;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-  }
-
   .slug {
     margin-bottom: 0;
     overflow-wrap: anywhere;
   }
 
-  .aviso,
-  .mensaje-exito,
-  .mensaje-error {
-    padding: 16px;
-    border-radius: 8px;
+  .acciones-publicacion,
+  .botones-comentario {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .autor {
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+
+  .sobre {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .texto-comentario {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .aviso {
+    padding: 16px;
+    border-radius: 8px;
     background: #f3f6fa;
   }
 
-  .error,
-  .mensaje-error {
+  .error {
     background: #fff1f0;
     color: #9b2525;
-  }
-
-  .mensaje-exito {
-    background: #eaf7ee;
-    color: #176b35;
   }
 
   @media (max-width: 640px) {
@@ -344,9 +426,14 @@ const estadoPublicacion = (status: string) => {
     .encabezado,
     .titulo-seccion,
     .publicacion,
-    .acciones-publicacion {
+    .comentario {
       align-items: flex-start;
       flex-direction: column;
+    }
+
+    .acciones-publicacion,
+    .botones-comentario {
+      flex-wrap: wrap;
     }
   }
 </style>

@@ -3,7 +3,6 @@ import { z } from 'astro/zod';
 import { getUser } from '@netlify/identity';
 import { getDatabase } from '@netlify/database';
 
-
 const slugValido = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 const textoOpcional = (max: number) =>
@@ -14,7 +13,10 @@ const urlOpcional = z
   .trim()
   .max(2048)
   .url()
-  .refine((value) => /^https?:\/\//i.test(value), 'Usa una URL HTTP o HTTPS.')
+  .refine(
+    (value) => /^https?:\/\//i.test(value),
+    'Usa una URL HTTP o HTTPS.',
+  )
   .nullish();
 
 export const server = {
@@ -62,7 +64,8 @@ export const server = {
       const duplicate = await db.sql`
         SELECT id
         FROM posts
-        WHERE kind = ${input.kind} AND slug = ${input.slug}
+        WHERE kind = ${input.kind}
+          AND slug = ${input.slug}
         LIMIT 1
       `;
 
@@ -165,6 +168,107 @@ export const server = {
       }
 
       return { id: post.id, title: post.title };
+    },
+  }),
+
+  submitComment: defineAction({
+    accept: 'form',
+
+    input: z.object({
+      post_id: z.string().uuid(),
+      display_name: z.string().trim().min(2).max(80),
+      body: z.string().trim().min(2).max(2000),
+      website: z.string().max(0).optional(),
+    }),
+
+    handler: async ({ post_id, display_name, body }) => {
+      const db = getDatabase();
+
+      const [post] = await db.sql<{ id: string }>`
+        SELECT id
+        FROM posts
+        WHERE id = ${post_id}
+          AND status = 'published'
+        LIMIT 1
+      `;
+
+      if (!post) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró esta publicación.',
+        });
+      }
+
+      await db.sql`
+        INSERT INTO comments (post_id, display_name, body)
+        VALUES (${post_id}, ${display_name}, ${body})
+      `;
+
+      return { message: 'Tu comentario fue enviado para revisión.' };
+    },
+  }),
+
+  moderateComment: defineAction({
+    accept: 'form',
+
+    input: z.object({
+      comment_id: z.string().uuid(),
+      status: z.enum(['approved', 'rejected']),
+    }),
+
+    handler: async ({ comment_id, status }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para moderar comentarios.',
+        });
+      }
+
+      if (!user.roles?.includes('admin')) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Tu cuenta no tiene permiso para moderar comentarios.',
+        });
+      }
+
+      const db = getDatabase();
+      const metadataName = user.userMetadata?.full_name;
+
+      const moderatorName =
+        typeof metadataName === 'string' && metadataName.trim()
+          ? metadataName.trim().slice(0, 120)
+          : user.email?.split('@')[0] ?? 'Administrador';
+
+      await db.sql`
+        INSERT INTO author_profiles (identity_user_id, display_name)
+        VALUES (${user.id}, ${moderatorName})
+        ON CONFLICT (identity_user_id)
+        DO UPDATE SET
+          display_name = EXCLUDED.display_name,
+          updated_at = NOW()
+      `;
+
+      const [comment] = await db.sql<{ id: string }>`
+        UPDATE comments
+        SET
+          status = ${status},
+          moderator_identity_id = ${user.id},
+          moderated_at = NOW()
+        WHERE id = ${comment_id}
+          AND status = 'pending'
+        RETURNING id
+      `;
+
+      if (!comment) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró el comentario pendiente.',
+        });
+      }
+
+      return { id: comment.id, status };
     },
   }),
 };

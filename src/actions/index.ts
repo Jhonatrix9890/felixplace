@@ -19,22 +19,24 @@ const urlOpcional = z
   )
   .nullish();
 
+const camposPublicacion = {
+  kind: z.enum(['news', 'tutorial']),
+  title: z.string().trim().min(5).max(180),
+  slug: z.string().trim().regex(slugValido),
+  category: textoOpcional(80),
+  image_url: urlOpcional,
+  image_alt: textoOpcional(200),
+  description: textoOpcional(350),
+  body_markdown: textoOpcional(50000),
+  seo_title: textoOpcional(180),
+  seo_description: textoOpcional(200),
+};
+
 export const server = {
   createPost: defineAction({
     accept: 'form',
 
-    input: z.object({
-      kind: z.enum(['news', 'tutorial']),
-      title: z.string().trim().min(5).max(180),
-      slug: z.string().trim().regex(slugValido),
-      category: textoOpcional(80),
-      image_url: urlOpcional,
-      image_alt: textoOpcional(200),
-      description: textoOpcional(350),
-      body_markdown: textoOpcional(50000),
-      seo_title: textoOpcional(180),
-      seo_description: textoOpcional(200),
-    }),
+    input: z.object(camposPublicacion),
 
     handler: async (input) => {
       const user = await getUser();
@@ -116,6 +118,102 @@ export const server = {
           ${input.seo_title ?? null},
           ${input.seo_description ?? null}
         )
+        RETURNING id, slug
+      `;
+
+      return { id: post.id, slug: post.slug };
+    },
+  }),
+
+  updatePost: defineAction({
+    accept: 'form',
+
+    input: z.object({
+      id: z.string().uuid(),
+      ...camposPublicacion,
+    }),
+
+    handler: async ({ id, ...input }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para editar una publicación.',
+        });
+      }
+
+      if (!user.roles?.includes('admin')) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Tu cuenta no tiene permiso para editar publicaciones.',
+        });
+      }
+
+      const db = getDatabase();
+
+      const [existingPost] = await db.sql<{
+        id: string;
+        slug: string;
+        status: string;
+        kind: 'news' | 'tutorial';
+      }>`
+        SELECT id, slug, status, kind
+        FROM posts
+        WHERE id = ${id}
+        LIMIT 1
+      `;
+
+      if (!existingPost) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró la publicación que deseas editar.',
+        });
+      }
+
+      if (
+        existingPost.status === 'published' &&
+        (existingPost.slug !== input.slug ||
+          existingPost.kind !== input.kind)
+      ) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message:
+            'No se puede cambiar el slug ni el tipo de una publicación ya publicada.',
+        });
+      }
+
+      const duplicate = await db.sql`
+        SELECT id
+        FROM posts
+        WHERE kind = ${input.kind}
+          AND slug = ${input.slug}
+          AND id <> ${id}
+        LIMIT 1
+      `;
+
+      if (duplicate.length > 0) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'Ya existe otra publicación de este tipo con ese slug.',
+        });
+      }
+
+      const [post] = await db.sql<{ id: string; slug: string }>`
+        UPDATE posts
+        SET
+          kind = ${input.kind},
+          title = ${input.title},
+          slug = ${input.slug},
+          category = ${input.category ?? null},
+          image_url = ${input.image_url ?? null},
+          image_alt = ${input.image_alt ?? null},
+          description = ${input.description ?? ''},
+          body_markdown = ${input.body_markdown ?? ''},
+          seo_title = ${input.seo_title ?? null},
+          seo_description = ${input.seo_description ?? null},
+          updated_at = NOW()
+        WHERE id = ${id}
         RETURNING id, slug
       `;
 

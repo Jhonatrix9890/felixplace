@@ -1,0 +1,346 @@
+---
+import { actions } from 'astro:actions';
+import { getUser } from '@netlify/identity';
+import { getDatabase } from '@netlify/database';
+
+export const prerender = false;
+
+const user = await getUser();
+
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+if (!user.roles?.includes('admin')) {
+  return new Response('Tu cuenta no tiene permiso para editar publicaciones.', {
+    status: 403,
+  });
+}
+
+const actionResult = Astro.getActionResult(actions.updatePost);
+
+if (actionResult && !actionResult.error && actionResult.data) {
+  return Astro.redirect(
+    `/admin/editar/${actionResult.data.id}?guardado=1`,
+  );
+}
+
+const id = Astro.params.id;
+const db = getDatabase();
+
+const [post] = await db.sql`
+  SELECT
+    id,
+    kind,
+    title,
+    slug,
+    category,
+    image_url,
+    image_alt,
+    description,
+    body_markdown,
+    status,
+    seo_title,
+    seo_description
+  FROM posts
+  WHERE id = ${id}
+  LIMIT 1
+`;
+
+if (!post) {
+  Astro.response.status = 404;
+}
+
+const errorMessage = actionResult?.error?.message;
+const guardado = Astro.url.searchParams.get('guardado') === '1';
+const esPublicada = post?.status === 'published';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Editar publicación | FelixPlace</title>
+  </head>
+
+  <body>
+    <main class="panel">
+      <a class="volver" href="/admin">← Volver al panel</a>
+
+      {post ? (
+        <>
+          <p class="marca">FELIXPLACE</p>
+          <h1>Editar publicación</h1>
+          <p class="ayuda">
+            Estado: <strong>{post.status}</strong>
+          </p>
+
+          {guardado && (
+            <p class="mensaje exito">Cambios guardados correctamente.</p>
+          )}
+
+          {errorMessage && (
+            <p class="mensaje error">{errorMessage}</p>
+          )}
+
+          <form method="POST" action={actions.updatePost}>
+            <input type="hidden" name="id" value={post.id} />
+
+            {esPublicada && (
+              <input type="hidden" name="kind" value={post.kind} />
+            )}
+
+            <label for="kind">Tipo de publicación</label>
+            <select
+              id="kind"
+              name={esPublicada ? undefined : 'kind'}
+              disabled={esPublicada}
+              required
+            >
+              <option value="news" selected={post.kind === 'news'}>
+                Noticia
+              </option>
+              <option value="tutorial" selected={post.kind === 'tutorial'}>
+                Tutorial
+              </option>
+            </select>
+
+            {esPublicada && (
+              <small>
+                No se puede cambiar el tipo de una publicación publicada.
+              </small>
+            )}
+
+            <label for="title">Título</label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              maxlength="180"
+              value={post.title}
+              required
+            />
+
+            <label for="slug">Slug de la URL</label>
+            <input
+              id="slug"
+              name="slug"
+              type="text"
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              maxlength="180"
+              value={post.slug}
+              readonly={esPublicada}
+              required
+            />
+            <small>
+              {esPublicada
+                ? 'El slug no se puede cambiar porque la publicación ya está publicada.'
+                : 'Se genera desde el título y puedes editarlo.'}
+            </small>
+
+            <label for="category">Categoría</label>
+            <input
+              id="category"
+              name="category"
+              type="text"
+              maxlength="80"
+              value={post.category ?? ''}
+            />
+
+            <label for="image_url">URL de la imagen de Postimages</label>
+            <input
+              id="image_url"
+              name="image_url"
+              type="url"
+              maxlength="2048"
+              placeholder="https://..."
+              value={post.image_url ?? ''}
+            />
+
+            <label for="image_alt">Texto alternativo de la imagen</label>
+            <input
+              id="image_alt"
+              name="image_alt"
+              type="text"
+              maxlength="200"
+              value={post.image_alt ?? ''}
+            />
+
+            <label for="description">Descripción breve</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="3"
+              maxlength="350"
+            >{post.description ?? ''}</textarea>
+
+            <label for="body_markdown">Contenido</label>
+            <textarea
+              id="body_markdown"
+              name="body_markdown"
+              rows="14"
+              maxlength="50000"
+              placeholder="Escribe aquí el contenido de la publicación."
+            >{post.body_markdown ?? ''}</textarea>
+
+            <label for="seo_title">Título SEO (opcional)</label>
+            <input
+              id="seo_title"
+              name="seo_title"
+              type="text"
+              maxlength="180"
+              value={post.seo_title ?? ''}
+            />
+
+            <label for="seo_description">Descripción SEO (opcional)</label>
+            <textarea
+              id="seo_description"
+              name="seo_description"
+              rows="3"
+              maxlength="200"
+            >{post.seo_description ?? ''}</textarea>
+
+            <button type="submit">Guardar cambios</button>
+          </form>
+        </>
+      ) : (
+        <>
+          <h1>Publicación no encontrada</h1>
+          <p>No encontramos la publicación que quieres editar.</p>
+        </>
+      )}
+    </main>
+
+    <script>
+      const titleInput = document.querySelector<HTMLInputElement>('#title');
+      const slugInput = document.querySelector<HTMLInputElement>('#slug');
+
+      function crearSlug(texto: string) {
+        return texto
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+
+      let slugEditado = Boolean(
+        titleInput &&
+          slugInput &&
+          slugInput.value !== crearSlug(titleInput.value),
+      );
+
+      titleInput?.addEventListener('input', () => {
+        if (titleInput && slugInput && !slugEditado && !slugInput.readOnly) {
+          slugInput.value = crearSlug(titleInput.value);
+        }
+      });
+
+      slugInput?.addEventListener('input', () => {
+        if (slugInput && !slugInput.readOnly) {
+          slugEditado = true;
+          slugInput.value = crearSlug(slugInput.value);
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #f3f5f8;
+    color: #172033;
+    font-family: Arial, sans-serif;
+  }
+
+  .panel {
+    width: min(100%, 760px);
+    margin: 0 auto;
+    padding: 32px;
+    border: 1px solid #e4e8ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 45px rgb(20 35 60 / 8%);
+  }
+
+  .volver {
+    color: #1769aa;
+    text-decoration: none;
+  }
+
+  .marca {
+    margin-top: 28px;
+    color: #1769aa;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  .ayuda,
+  small {
+    color: #596579;
+  }
+
+  form {
+    display: grid;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  label {
+    margin-top: 10px;
+    font-weight: 700;
+  }
+
+  input,
+  select,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd3df;
+    border-radius: 8px;
+    color: inherit;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  button {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mensaje {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .exito {
+    background: #e9f8ef;
+    color: #176236;
+  }
+
+  .error {
+    background: #fff0f0;
+    color: #9b2020;
+  }
+
+  @media (max-width: 600px) {
+    .panel {
+      padding: 22px;
+    }
+  }
+</style>

@@ -6,7 +6,7 @@ import { actions } from 'astro:actions';
 import { marked } from 'marked';
 import sanitizeHtml from 'sanitize-html';
 
-const slug = Astro.params.slug;
+const slug = Astro.params.slug ?? '';
 const db = getDatabase();
 
 const [post] = await db.sql`
@@ -58,6 +58,16 @@ const pageDescription =
 const articleHtml = post
   ? sanitizeHtml(await marked.parse(post.body_markdown || ''))
   : '';
+
+const siteUrl = Astro.site ?? new URL('https://felixplace.com');
+
+const canonicalUrl = post
+  ? new URL(`/tutoriales/${post.slug}`, siteUrl).toString()
+  : '';
+
+const publishedTime = post?.published_at
+  ? new Date(post.published_at).toISOString()
+  : '';
 ---
 
 <html lang="es">
@@ -66,6 +76,48 @@ const articleHtml = post
     <meta name="viewport" content="width=device-width" />
     <title>{pageTitle} | FelixPlace</title>
     <meta name="description" content={pageDescription} />
+    <meta
+      name="robots"
+      content={post ? 'index, follow' : 'noindex, nofollow'}
+    />
+
+    {post && <link rel="canonical" href={canonicalUrl} />}
+
+    {post && (
+      <>
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="FelixPlace" />
+        <meta property="og:locale" content="es_EC" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${pageTitle} | FelixPlace`} />
+        <meta property="og:description" content={pageDescription} />
+
+        {post.image_url && (
+          <>
+            <meta property="og:image" content={post.image_url} />
+            <meta
+              property="og:image:alt"
+              content={post.image_alt || post.title}
+            />
+          </>
+        )}
+
+        {publishedTime && (
+          <meta property="article:published_time" content={publishedTime} />
+        )}
+
+        <meta
+          name="twitter:card"
+          content={post.image_url ? 'summary_large_image' : 'summary'}
+        />
+        <meta name="twitter:title" content={`${pageTitle} | FelixPlace`} />
+        <meta name="twitter:description" content={pageDescription} />
+
+        {post.image_url && (
+          <meta name="twitter:image" content={post.image_url} />
+        )}
+      </>
+    )}
   </head>
 
   <body>
@@ -74,13 +126,19 @@ const articleHtml = post
         <article>
           <a href="/tutoriales">← Volver a tutoriales</a>
 
-          <p>{post.category} · Tutorial</p>
+          <p>{post.category || 'Tecnología'} · Tutorial</p>
           <h1>{post.title}</h1>
-          <p>{post.description}</p>
+
+          {post.description && <p>{post.description}</p>}
+
           <p>Por {post.author_name}</p>
 
           {post.image_url && (
-            <img src={post.image_url} alt={post.image_alt || post.title} />
+            <img
+              src={post.image_url}
+              alt={post.image_alt || post.title}
+              fetchpriority="high"
+            />
           )}
 
           <div class="contenido" set:html={articleHtml}></div>

@@ -10,7 +10,10 @@ if (!user) {
   return Astro.redirect('/admin/login');
 }
 
-if (!user.roles?.includes('admin')) {
+const tieneAccesoEditorial =
+  user.roles?.some((role) => role === 'admin' || role === 'editor') ?? false;
+
+if (!tieneAccesoEditorial) {
   return new Response('Tu cuenta no tiene permiso para crear publicaciones.', {
     status: 403,
   });
@@ -47,9 +50,7 @@ const guardado = Astro.url.searchParams.get('guardado') === '1';
         <p class="mensaje exito">Borrador guardado correctamente.</p>
       )}
 
-      {errorMessage && (
-        <p class="mensaje error">{errorMessage}</p>
-      )}
+      {errorMessage && <p class="mensaje error">{errorMessage}</p>}
 
       <form method="POST" action={actions.createPost} data-post-form>
         <label for="kind">Tipo de publicación</label>

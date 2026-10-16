@@ -29,6 +29,19 @@ const posts = await db.sql`
       content="Noticias, tutoriales y cursos de tecnología para todos en FelixPlace."
     />
     <title>FelixPlace | Tecnología para todos</title>
+
+    <script is:inline>
+      const identityParams = new URLSearchParams(window.location.hash.slice(1));
+
+      if (
+        identityParams.has('invite_token') ||
+        identityParams.has('confirmation_token')
+      ) {
+        window.location.replace(
+          `/admin/login#${identityParams.toString()}`,
+        );
+      }
+    </script>
   </head>
 
   <body>
@@ -58,7 +71,9 @@ const posts = await db.sql`
         <h2>Lo más reciente</h2>
 
         {posts.length === 0 ? (
-          <p class="vacio">Pronto encontrarás aquí nuestras primeras publicaciones.</p>
+          <p class="vacio">
+            Pronto encontrarás aquí nuestras primeras publicaciones.
+          </p>
         ) : (
           <div class="grid">
             {posts.map((post) => {

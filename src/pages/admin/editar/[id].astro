@@ -11,7 +11,10 @@ if (!user) {
   return Astro.redirect('/admin/login');
 }
 
-if (!user.roles?.includes('admin')) {
+const tieneAccesoEditorial =
+  user.roles?.some((role) => role === 'admin' || role === 'editor') ?? false;
+
+if (!tieneAccesoEditorial) {
   return new Response('Tu cuenta no tiene permiso para editar publicaciones.', {
     status: 403,
   });
@@ -20,9 +23,7 @@ if (!user.roles?.includes('admin')) {
 const actionResult = Astro.getActionResult(actions.updatePost);
 
 if (actionResult && !actionResult.error && actionResult.data) {
-  return Astro.redirect(
-    `/admin/editar/${actionResult.data.id}?guardado=1`,
-  );
+  return Astro.redirect(`/admin/editar/${actionResult.data.id}?guardado=1`);
 }
 
 const id = Astro.params.id;
@@ -81,9 +82,7 @@ const esPublicada = post?.status === 'published';
             <p class="mensaje exito">Cambios guardados correctamente.</p>
           )}
 
-          {errorMessage && (
-            <p class="mensaje error">{errorMessage}</p>
-          )}
+          {errorMessage && <p class="mensaje error">{errorMessage}</p>}
 
           <form method="POST" action={actions.updatePost}>
             <input type="hidden" name="id" value={post.id} />

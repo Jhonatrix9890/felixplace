@@ -3,26 +3,35 @@ import { z } from 'astro/zod';
 import { getUser } from '@netlify/identity';
 import { getDatabase } from '@netlify/database';
 
-const slugValido = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const slugValido = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+const valorVacioComoNulo = (value: unknown) =>
+  typeof value === 'string' && value.trim() === '' ? null : value;
 
 const textoOpcional = (max: number) =>
-  z.string().trim().max(max).nullish();
+  z.preprocess(
+    valorVacioComoNulo,
+    z.string().trim().max(max).nullish(),
+  );
 
-const urlOpcional = z
-  .string()
-  .trim()
-  .max(2048)
-  .url()
-  .refine(
-    (value) => /^https?:\/\//i.test(value),
-    'Usa una URL HTTP o HTTPS.',
-  )
-  .nullish();
+const urlOpcional = z.preprocess(
+  valorVacioComoNulo,
+  z
+    .string()
+    .trim()
+    .max(2048)
+    .url()
+    .refine(
+      (value) => /^https?:\/\//i.test(value),
+      'Usa una URL HTTP o HTTPS.',
+    )
+    .nullish(),
+);
 
 const camposPublicacion = {
   kind: z.enum(['news', 'tutorial']),
   title: z.string().trim().min(5).max(180),
-  slug: z.string().trim().regex(slugValido),
+  slug: z.string().trim().regex(slugValido, 'Escribe un slug válido.'),
   category: textoOpcional(80),
   image_url: urlOpcional,
   image_alt: textoOpcional(200),
@@ -31,6 +40,9 @@ const camposPublicacion = {
   seo_title: textoOpcional(180),
   seo_description: textoOpcional(200),
 };
+
+const tienePermisoEditorial = (roles: readonly string[] | undefined) =>
+  roles?.some((role) => role === 'admin' || role === 'editor') ?? false;
 
 export const server = {
   createPost: defineAction({
@@ -48,7 +60,7 @@ export const server = {
         });
       }
 
-      if (!user.roles?.includes('admin')) {
+      if (!tienePermisoEditorial(user.roles)) {
         throw new ActionError({
           code: 'FORBIDDEN',
           message: 'Tu cuenta no tiene permiso para crear publicaciones.',
@@ -143,7 +155,7 @@ export const server = {
         });
       }
 
-      if (!user.roles?.includes('admin')) {
+      if (!tienePermisoEditorial(user.roles)) {
         throw new ActionError({
           code: 'FORBIDDEN',
           message: 'Tu cuenta no tiene permiso para editar publicaciones.',
@@ -238,7 +250,7 @@ export const server = {
         });
       }
 
-      if (!user.roles?.includes('admin')) {
+      if (!tienePermisoEditorial(user.roles)) {
         throw new ActionError({
           code: 'FORBIDDEN',
           message: 'Tu cuenta no tiene permiso para publicar.',

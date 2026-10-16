@@ -37,49 +37,157 @@ const title = 'Acceso de administración | FelixPlace';
         />
 
         <button id="login-button" type="submit">Iniciar sesión</button>
-        <p id="status" role="status" aria-live="polite"></p>
       </form>
+
+      <form id="invite-form" hidden>
+        <p class="intro">
+          Acepta la invitación creando una contraseña para tu cuenta.
+        </p>
+
+        <label for="invite-password">Crear contraseña</label>
+        <input
+          id="invite-password"
+          name="invite-password"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          required
+        />
+
+        <label for="invite-password-confirm">Repetir contraseña</label>
+        <input
+          id="invite-password-confirm"
+          name="invite-password-confirm"
+          type="password"
+          autocomplete="new-password"
+          minlength="8"
+          required
+        />
+
+        <button id="invite-button" type="submit">Aceptar invitación</button>
+      </form>
+
+      <p id="status" role="status" aria-live="polite"></p>
     </main>
 
     <script>
-      import { handleAuthCallback, login } from '@netlify/identity';
+      import {
+        acceptInvite,
+        handleAuthCallback,
+        login,
+      } from '@netlify/identity';
 
-      const form = document.querySelector('#login-form');
-      const status = document.querySelector('#status');
-      const button = document.querySelector('#login-button');
+      const loginForm =
+        document.querySelector<HTMLFormElement>('#login-form');
+      const inviteForm =
+        document.querySelector<HTMLFormElement>('#invite-form');
+      const status = document.querySelector<HTMLParagraphElement>('#status');
+      const loginButton =
+        document.querySelector<HTMLButtonElement>('#login-button');
+      const inviteButton =
+        document.querySelector<HTMLButtonElement>('#invite-button');
+      const emailInput =
+        document.querySelector<HTMLInputElement>('#email');
+      const loginPasswordInput =
+        document.querySelector<HTMLInputElement>('#password');
+      const invitePasswordInput =
+        document.querySelector<HTMLInputElement>('#invite-password');
+      const invitePasswordConfirmInput =
+        document.querySelector<HTMLInputElement>('#invite-password-confirm');
 
-      function showMessage(message) {
+      let inviteToken: string | undefined;
+
+      function showMessage(message: string) {
         if (status) status.textContent = message;
       }
 
-      // Procesa invitaciones y otros enlaces enviados por Netlify Identity.
-      handleAuthCallback()
-        .then((result) => {
-          if (result) {
-            showMessage('Invitación procesada. Ahora puedes iniciar sesión.');
-          }
-        })
-        .catch(() => {
-          showMessage('No se pudo procesar el enlace. Solicita una nueva invitación.');
-        });
+      try {
+        const result = await handleAuthCallback();
 
-      form?.addEventListener('submit', async (event) => {
+        if (result?.type === 'invite') {
+          inviteToken = result.token;
+
+          if (!inviteToken) {
+            throw new Error('No se recibió el token de invitación.');
+          }
+
+          if (loginForm) loginForm.hidden = true;
+          if (inviteForm) inviteForm.hidden = false;
+
+          showMessage('Crea una contraseña para activar tu cuenta.');
+        } else if (result?.type === 'confirmation') {
+          showMessage('Correo confirmado. Ahora puedes iniciar sesión.');
+        }
+      } catch {
+        showMessage(
+          'No se pudo procesar el enlace. Puede haber vencido; solicita una nueva invitación.',
+        );
+      }
+
+      inviteForm?.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const email = document.querySelector('#email')?.value.trim();
-        const password = document.querySelector('#password')?.value;
+        const password = invitePasswordInput?.value;
+        const passwordConfirmation = invitePasswordConfirmInput?.value;
+
+        if (!inviteToken) {
+          showMessage('No encontramos un enlace de invitación válido.');
+          return;
+        }
+
+        if (!password || !passwordConfirmation) {
+          showMessage('Completa los dos campos de contraseña.');
+          return;
+        }
+
+        if (password !== passwordConfirmation) {
+          showMessage('Las contraseñas no coinciden.');
+          return;
+        }
+
+        if (inviteButton) inviteButton.disabled = true;
+        showMessage('Activando la cuenta…');
+
+        try {
+          const invitedUser = await acceptInvite(inviteToken, password);
+
+          if (emailInput && invitedUser.email) {
+            emailInput.value = invitedUser.email;
+          }
+
+          if (inviteForm) inviteForm.hidden = true;
+          if (loginForm) loginForm.hidden = false;
+
+          showMessage(
+            'Cuenta activada. Inicia sesión con la contraseña que acabas de crear.',
+          );
+        } catch {
+          showMessage(
+            'No se pudo aceptar la invitación. Revisa el enlace o solicita uno nuevo.',
+          );
+          if (inviteButton) inviteButton.disabled = false;
+        }
+      });
+
+      loginForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const email = emailInput?.value.trim();
+        const password = loginPasswordInput?.value;
 
         if (!email || !password) return;
 
-        if (button) button.disabled = true;
+        if (loginButton) loginButton.disabled = true;
         showMessage('Verificando acceso…');
 
         try {
           await login(email, password);
           window.location.href = '/admin';
         } catch {
-          showMessage('No se pudo iniciar sesión. Revisa el correo y la contraseña.');
-          if (button) button.disabled = false;
+          showMessage(
+            'No se pudo iniciar sesión. Revisa el correo y la contraseña.',
+          );
+          if (loginButton) loginButton.disabled = false;
         }
       });
     </script>

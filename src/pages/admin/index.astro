@@ -11,8 +11,11 @@ if (!user) {
   return Astro.redirect('/admin/login');
 }
 
-if (!(user.roles ?? []).includes('admin')) {
-  return new Response('Tu cuenta todavía no tiene el rol de administrador.', {
+const esAdmin = user.roles?.includes('admin') ?? false;
+const esEditor = user.roles?.includes('editor') ?? false;
+
+if (!esAdmin && !esEditor) {
+  return new Response('Tu cuenta no tiene permiso para entrar al panel.', {
     status: 403,
   });
 }
@@ -37,17 +40,19 @@ const publishResult = Astro.getActionResult(actions.publishPost);
 const moderationResult = Astro.getActionResult(actions.moderateComment);
 
 const actionError =
-  publishResult?.error?.message ?? moderationResult?.error?.message;
+  publishResult?.error?.message ??
+  (esAdmin ? moderationResult?.error?.message : undefined);
 
 const publishMessage = publishResult?.data
   ? 'La publicación fue publicada correctamente.'
   : '';
 
-const moderationMessage = moderationResult?.data
-  ? moderationResult.data.status === 'approved'
-    ? 'El comentario fue aprobado.'
-    : 'El comentario fue rechazado.'
-  : '';
+const moderationMessage =
+  esAdmin && moderationResult?.data
+    ? moderationResult.data.status === 'approved'
+      ? 'El comentario fue aprobado.'
+      : 'El comentario fue rechazado.'
+    : '';
 
 let posts: PostRow[] = [];
 let pendingComments: PendingComment[] = [];
@@ -63,19 +68,21 @@ try {
     LIMIT 50
   `) as unknown as PostRow[];
 
-  pendingComments = (await db.sql`
-    SELECT
-      comments.id,
-      comments.post_id,
-      posts.title AS post_title,
-      comments.display_name,
-      comments.body
-    FROM comments
-    INNER JOIN posts ON posts.id = comments.post_id
-    WHERE comments.status = 'pending'
-    ORDER BY comments.created_at ASC
-    LIMIT 100
-  `) as unknown as PendingComment[];
+  if (esAdmin) {
+    pendingComments = (await db.sql`
+      SELECT
+        comments.id,
+        comments.post_id,
+        posts.title AS post_title,
+        comments.display_name,
+        comments.body
+      FROM comments
+      INNER JOIN posts ON posts.id = comments.post_id
+      WHERE comments.status = 'pending'
+      ORDER BY comments.created_at ASC
+      LIMIT 100
+    `) as unknown as PendingComment[];
+  }
 } catch (error) {
   errorMessage =
     error instanceof Error
@@ -116,6 +123,7 @@ const estadoPublicacion = (status: string) => {
           <h1>Panel de administración</h1>
           <p class="sesion">
             Sesión iniciada como <strong>{user.email}</strong>
+            {esAdmin ? ' · Administrador' : ' · Editor'}
           </p>
         </div>
 
@@ -128,58 +136,60 @@ const estadoPublicacion = (status: string) => {
       {publishMessage && <p class="aviso">{publishMessage}</p>}
       {moderationMessage && <p class="aviso">{moderationMessage}</p>}
 
-      <section class="seccion">
-        <div class="titulo-seccion">
-          <div>
-            <h2>Comentarios pendientes</h2>
-            <p>Aprueba los comentarios para que aparezcan en la página.</p>
+      {esAdmin && (
+        <section class="seccion">
+          <div class="titulo-seccion">
+            <div>
+              <h2>Comentarios pendientes</h2>
+              <p>Aprueba los comentarios para que aparezcan en la página.</p>
+            </div>
           </div>
-        </div>
 
-        {errorMessage ? (
-          <p class="aviso error">
-            No se pudieron cargar los datos: {errorMessage}
-          </p>
-        ) : pendingComments.length === 0 ? (
-          <p class="aviso">No hay comentarios pendientes de revisión.</p>
-        ) : (
-          <div class="lista">
-            {pendingComments.map((comment) => (
-              <article class="comentario">
-                <div>
-                  <p class="autor">{comment.display_name}</p>
-                  <p class="sobre">
-                    Comentó en: <strong>{comment.post_title}</strong>
-                  </p>
-                  <p class="texto-comentario">{comment.body}</p>
-                </div>
+          {errorMessage ? (
+            <p class="aviso error">
+              No se pudieron cargar los datos: {errorMessage}
+            </p>
+          ) : pendingComments.length === 0 ? (
+            <p class="aviso">No hay comentarios pendientes de revisión.</p>
+          ) : (
+            <div class="lista">
+              {pendingComments.map((comment) => (
+                <article class="comentario">
+                  <div>
+                    <p class="autor">{comment.display_name}</p>
+                    <p class="sobre">
+                      Comentó en: <strong>{comment.post_title}</strong>
+                    </p>
+                    <p class="texto-comentario">{comment.body}</p>
+                  </div>
 
-                <div class="botones-comentario">
-                  <form method="POST" action={actions.moderateComment}>
-                    <input
-                      type="hidden"
-                      name="comment_id"
-                      value={comment.id}
-                    />
-                    <input type="hidden" name="status" value="approved" />
-                    <button class="aprobar" type="submit">Aprobar</button>
-                  </form>
+                  <div class="botones-comentario">
+                    <form method="POST" action={actions.moderateComment}>
+                      <input
+                        type="hidden"
+                        name="comment_id"
+                        value={comment.id}
+                      />
+                      <input type="hidden" name="status" value="approved" />
+                      <button class="aprobar" type="submit">Aprobar</button>
+                    </form>
 
-                  <form method="POST" action={actions.moderateComment}>
-                    <input
-                      type="hidden"
-                      name="comment_id"
-                      value={comment.id}
-                    />
-                    <input type="hidden" name="status" value="rejected" />
-                    <button class="rechazar" type="submit">Rechazar</button>
-                  </form>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+                    <form method="POST" action={actions.moderateComment}>
+                      <input
+                        type="hidden"
+                        name="comment_id"
+                        value={comment.id}
+                      />
+                      <input type="hidden" name="status" value="rejected" />
+                      <button class="rechazar" type="submit">Rechazar</button>
+                    </form>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <section class="seccion publicaciones">
         <div class="titulo-seccion">
@@ -210,7 +220,7 @@ const estadoPublicacion = (status: string) => {
                 </div>
 
                 <div class="acciones-publicacion">
-                <a class="editar" href={`/admin/editar/${post.id}`}>Editar</a>
+                  <a class="editar" href={`/admin/editar/${post.id}`}>Editar</a>
                   <span class="estado">{estadoPublicacion(post.status)}</span>
 
                   {(post.status === 'draft' || post.status === 'review') && (
@@ -392,6 +402,12 @@ const estadoPublicacion = (status: string) => {
     gap: 10px;
   }
 
+  .editar {
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
   .autor {
     margin-bottom: 5px;
     font-weight: 700;
@@ -437,10 +453,4 @@ const estadoPublicacion = (status: string) => {
       flex-wrap: wrap;
     }
   }
-
-  .editar {
-  color: #1769aa;
-  font-weight: 700;
-  text-decoration: none;
-}
 </style>

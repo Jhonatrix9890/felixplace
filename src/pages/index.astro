@@ -1,0 +1,261 @@
+---
+export const prerender = false;
+
+import { getDatabase } from '@netlify/database';
+
+Astro.response.headers.set(
+  'Netlify-CDN-Cache-Control',
+  'public, s-maxage=300, stale-while-revalidate=300',
+);
+
+const db = getDatabase();
+
+const posts = await db.sql`
+  SELECT kind, title, slug, category, image_url, image_alt, description
+  FROM posts
+  WHERE status = 'published'
+  ORDER BY published_at DESC NULLS LAST, created_at DESC
+  LIMIT 6
+`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta
+      name="description"
+      content="Noticias, tutoriales y cursos de tecnología para todos en FelixPlace."
+    />
+    <title>FelixPlace | Tecnología para todos</title>
+
+    <script is:inline>
+      const identityParams = new URLSearchParams(window.location.hash.slice(1));
+
+      if (
+        identityParams.has('invite_token') ||
+        identityParams.has('confirmation_token')
+      ) {
+        window.location.replace(
+          `/admin/login#${identityParams.toString()}`,
+        );
+      }
+    </script>
+  </head>
+
+  <body>
+    <header class="barra">
+      <a class="marca" href="/">FELIXPLACE</a>
+      <nav aria-label="Navegación principal">
+        <a href="/noticias">Noticias</a>
+        <a href="/tutoriales">Tutoriales</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="portada">
+        <p class="etiqueta">TECNOLOGÍA PARA TODOS</p>
+        <h1>Aprende, descubre y mantente al día.</h1>
+        <p>
+          Noticias y tutoriales explicados de forma clara para ayudarte a
+          aprovechar mejor la tecnología.
+        </p>
+        <div class="enlaces">
+          <a class="boton" href="/noticias">Leer noticias</a>
+          <a class="boton secundario" href="/tutoriales">Ver tutoriales</a>
+        </div>
+      </section>
+
+      <section class="recientes">
+        <h2>Lo más reciente</h2>
+
+        {posts.length === 0 ? (
+          <p class="vacio">
+            Pronto encontrarás aquí nuestras primeras publicaciones.
+          </p>
+        ) : (
+          <div class="grid">
+            {posts.map((post) => {
+              const ruta =
+                post.kind === 'tutorial'
+                  ? `/tutoriales/${post.slug}`
+                  : `/noticias/${post.slug}`;
+
+              return (
+                <article class="card">
+                  {post.image_url && (
+                    <img
+                      src={post.image_url}
+                      alt={post.image_alt || post.title}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
+
+                  <p class="categoria">
+                    {post.category ||
+                      (post.kind === 'tutorial' ? 'Tutorial' : 'Noticia')}
+                  </p>
+
+                  <h3><a href={ruta}>{post.title}</a></h3>
+                  <p>{post.description}</p>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    color: #172033;
+    font-family: system-ui, sans-serif;
+    background: #f4f6fa;
+  }
+
+  .barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px max(24px, calc((100% - 1100px) / 2));
+    background: #fff;
+    border-bottom: 1px solid #e4e8ef;
+  }
+
+  .marca {
+    color: #1769aa;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    gap: 20px;
+  }
+
+  nav a {
+    color: #172033;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: #1769aa;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .portada {
+    padding: clamp(56px, 10vw, 110px) 0 72px;
+  }
+
+  .etiqueta,
+  .categoria {
+    color: #1769aa;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    max-width: 760px;
+    margin: 12px 0;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 1.05;
+  }
+
+  .portada > p:not(.etiqueta) {
+    max-width: 650px;
+    color: #596579;
+    font-size: 1.15rem;
+    line-height: 1.7;
+  }
+
+  .enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  .boton {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .boton.secundario {
+    background: #e8f0f8;
+    color: #1769aa;
+  }
+
+  .recientes {
+    padding: 0 0 64px;
+  }
+
+  .recientes h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 18px #17203312;
+  }
+
+  .card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .card h3 {
+    line-height: 1.35;
+  }
+
+  .card a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card a:hover {
+    color: #1769aa;
+  }
+
+  .card > p:last-child,
+  .vacio {
+    color: #647084;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 520px) {
+    .barra {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>

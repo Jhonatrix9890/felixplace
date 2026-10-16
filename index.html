@@ -16,34 +16,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- 🔹 SEO Felix Place - Página principal -->
-  <title>Felix Place | Noticias y Tutoriales Tecnológicos</title>
-  <meta name="description" content="Felix Place: descubre las últimas noticias, hacks y tutoriales tecnológicos para aprender, explorar y evolucionar en el mundo digital.">
-  <meta name="keywords" content="tecnología, tutoriales, hacks, noticias tech, inteligencia artificial, apps, gadgets, Felix Place">
-  <meta name="author" content="Felix Place">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://felixplace.com/">
+  <title>Felix Place | Noticias, tutoriales y tecnología</title>
 
-  <!-- 🧩 Open Graph -->
-  <meta property="og:title" content="Felix Place | Tecnología y Tutoriales">
-  <meta property="og:description" content="Noticias, hacks y tutoriales tecnológicos para aprender y descubrir el mundo digital.">
-  <meta property="og:image" content="https://felixplace.com/assets/banner.png">
-  <meta property="og:url" content="https://felixplace.com/">
-  <meta property="og:type" content="website">
+<meta
+  name="description"
+  content="Descubre noticias, tutoriales, guías y recursos tecnológicos explicados de forma sencilla en Felix Place."
+>
+
+<meta name="author" content="Felix Place">
+<meta name="robots" content="index, follow">
+
+<link
+  rel="canonical"
+  href="https://felixplace.com/"
+>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_EC">
+<meta property="og:site_name" content="Felix Place">
+
+<meta
+  property="og:title"
+  content="Felix Place | Noticias, tutoriales y tecnología"
+>
+
+<meta
+  property="og:description"
+  content="Noticias, tutoriales, guías y recursos tecnológicos explicados de manera sencilla."
+>
+
+<meta
+  property="og:url"
+  content="https://felixplace.com/"
+>
+
+<meta
+  property="og:image"
+  content="https://felixplace.com/assets/banner.png"
+>
+
+<meta
+  property="og:image:alt"
+  content="Felix Place, noticias y tutoriales de tecnología"
+>
+
+<!-- Twitter/X -->
+<meta name="twitter:card" content="summary_large_image">
+
+<meta
+  name="twitter:title"
+  content="Felix Place | Noticias, tutoriales y tecnología"
+>
+
+<meta
+  name="twitter:description"
+  content="Noticias, tutoriales, guías y recursos tecnológicos explicados de manera sencilla."
+>
+
+<meta
+  name="twitter:image"
+  content="https://felixplace.com/assets/banner.png"
+>
 
   <!-- 🧠 JSON-LD Estructurado -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Felix Place",
-    "url": "https://felixplace.com/",
-    "description": "Noticias y tutoriales tecnológicos para aprender y descubrir el mundo digital.",
-    "publisher": {
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://felixplace.com/#website",
+      "url": "https://felixplace.com/",
+      "name": "Felix Place",
+      "description": "Noticias, tutoriales, guías y recursos tecnológicos explicados de forma sencilla.",
+      "inLanguage": "es-EC"
+    },
+    {
       "@type": "Organization",
-      "name": "Felix Place"
+      "@id": "https://felixplace.com/#organization",
+      "name": "Felix Place",
+      "url": "https://felixplace.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://felixplace.com/assets/logo.png"
+      },
+      "email": "felixplace13@gmail.com",
+      "sameAs": [
+        "https://www.tiktok.com/@felixplace13",
+        "https://www.facebook.com/felixplace13",
+        "https://www.youtube.com/@felixplace2947"
+      ]
     }
-  }
-  </script>
+  ]
+}
+</script>
 
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -61,15 +128,36 @@
   <img src="assets/logo.png" alt="Felix Place Logo">
   <span>Felix Place</span>
 </a>
-    <div class="menu-toggle" id="menu-toggle">
-       <i class="fa fa-bars"></i>
-    </div>
-    <nav class="nav-links">
-      <a href="index.html" class="active">Inicio</a>
-      <a href="noticias.html" >Noticias</a>
-      <a href="tutoriales.html" >Tutoriales</a>
-      <a href="sugerencias.html" >Sugerencias</a>
-      <a href="#" class="search"><i class="fa fa-search"></i></a>
+    <button
+      class="menu-toggle"
+      id="menuToggle"
+      type="button"
+      aria-label="Abrir menú de navegación"
+      aria-controls="navLinks"
+      aria-expanded="false"
+    >
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+    <nav class="nav-links" id="navLinks" aria-label="Navegación principal">
+      <a href="index.html" data-page="inicio">
+        Inicio
+      </a>
+
+      <a href="noticias.html" data-page="noticias">
+        Noticias
+      </a>
+
+      <a href="tutoriales.html" data-page="tutoriales">
+        Tutoriales
+      </a>
+
+      <a href="acerca-de.html" data-page="acerca">
+        Acerca de
+      </a>
+
+      <a href="contacto.html" data-page="contacto">
+        Contacto
+      </a>
     </nav>
   </header>
 
@@ -155,33 +243,196 @@
 
   <!-- 🔹 FOOTER -->
    
-<footer class="footer">
-  <div class="redes-footer">
-    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-    <a href="https://www.tiktok.com/@felixplace13"><i class="fa-brands fa-tiktok"></i></a>
-    <a href="https://www.facebook.com/felixplace13"><i class="fa-brands fa-facebook-f"></i></a>
-    <a href="https://www.youtube.com/@felixplace2947"><i class="fa-brands fa-youtube"></i></a>
-  </div>
+<footer class="footer-principal">
+  <div class="footer-contenedor">
 
-  <div class="footer-text">
-    <h3>Felix Place</h3>
-    <p>
-      Felix Place es un espacio digital dedicado a descubrir y compartir lo mejor del mundo tecnológico:
-      curiosidades, tendencias, innovación y herramientas digitales que transforman la forma en que vivimos y
-      trabajamos. Su objetivo es inspirar, informar y conectar a las personas con la tecnología de una manera
-      práctica y entretenida, convirtiéndose en un punto de encuentro para quienes buscan aprender, explorar y
-      mantenerse actualizados en la era digital.
-    </p>
-    <p class="copy">© FELIXPLACE 2025 TODOS LOS DERECHOS RESERVADOS</p>
+    <div class="footer-grid">
+
+      <!-- MARCA -->
+      <div class="footer-marca">
+        <a href="index.html" class="footer-logo">
+          <img
+            src="assets/logo.png"
+            alt="Logo de Felix Place"
+          >
+
+          <span>Felix Place</span>
+        </a>
+
+        <p>
+          Noticias, tutoriales y recursos tecnológicos explicados de
+          manera sencilla para ayudarte a aprender, descubrir y
+          desenvolverte mejor en el mundo digital.
+        </p>
+
+        <div class="footer-redes">
+          <a
+            href="https://www.tiktok.com/@felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok de Felix Place"
+            title="TikTok"
+          >
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+
+          <a
+            href="https://www.facebook.com/felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook de Felix Place"
+            title="Facebook"
+          >
+            <i class="fa-brands fa-facebook-f"></i>
+          </a>
+
+          <a
+            href="https://www.youtube.com/@felixplace2947"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube de Felix Place"
+            title="YouTube"
+          >
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- NAVEGACIÓN -->
+      <div class="footer-columna">
+        <h2>Explorar</h2>
+
+        <ul class="footer-enlaces">
+          <li>
+            <a href="index.html">Inicio</a>
+          </li>
+
+          <li>
+            <a href="noticias.html">Noticias</a>
+          </li>
+
+          <li>
+            <a href="tutoriales.html">Tutoriales</a>
+          </li>
+
+          <li>
+            <a href="acerca-de.html">Acerca de</a>
+          </li>
+
+          <li>
+            <a href="contacto.html">Contacto</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- LEGAL -->
+      <div class="footer-columna">
+        <h2>Información legal</h2>
+
+        <ul class="footer-enlaces">
+          <li>
+            <a href="politica-privacidad.html">
+              Política de Privacidad
+            </a>
+          </li>
+
+          <li>
+            <a href="politica-cookies.html">
+              Política de Cookies
+            </a>
+          </li>
+
+          <li>
+            <a href="terminos-condiciones.html">
+              Términos y Condiciones
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CONTACTO -->
+      <div class="footer-columna">
+        <h2>Contacto</h2>
+
+        <div class="footer-contacto">
+          <a href="mailto:felixplace13@gmail.com">
+            <i class="fa-solid fa-envelope"></i>
+
+            <span>felixplace13@gmail.com</span>
+          </a>
+        </div>
+
+        <div class="footer-mensaje">
+          <p>
+            ¿Encontraste un error o tienes una idea para un nuevo
+            tutorial? Envíanos un mensaje desde nuestra página de
+            contacto.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PARTE INFERIOR -->
+    <div class="footer-inferior">
+      <p>
+        © <span class="anio-actual">2026</span> Felix Place.
+        Todos los derechos reservados.
+      </p>
+
+      <p>
+        Contenido tecnológico creado desde Ecuador.
+      </p>
+    </div>
+
   </div>
 </footer>
 <script>
-  const menuToggle = document.getElementById('menu-toggle');
-  const navLinks = document.querySelector('.nav-links');
-  
-  menuToggle.addEventListener('click', () => {
-    navLinks.classList.toggle('show');
-  });
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks = document.getElementById("navLinks");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+    }); 
+
+  const elementosAnio = document.querySelectorAll(".anio-actual");
+
+elementosAnio.forEach((elemento) => {
+  elemento.textContent = new Date().getFullYear();
+});
+
+
+const paginaActual = window.location.pathname
+  .split("/")
+  .pop()
+  .toLowerCase();
+
+const enlacesNavegacion = document.querySelectorAll(
+  ".nav-links a[data-page]"
+);
+
+const mapaPaginas = {
+  "": "inicio",
+  "index.html": "inicio",
+  "noticias.html": "noticias",
+  "detalle.html": "noticias",
+  "tutoriales.html": "tutoriales",
+  "acerca-de.html": "acerca",
+  "contacto.html": "contacto",
+  "sugerencias.html": "contacto",
+  "politica-privacidad.html": "",
+  "politica-cookies.html": "",
+  "terminos-condiciones.html": ""
+};
+
+const seccionActual = mapaPaginas[paginaActual];
+
+enlacesNavegacion.forEach((enlace) => {
+  if (enlace.dataset.page === seccionActual) {
+    enlace.classList.add("active");
+    enlace.setAttribute("aria-current", "page");
+  }
+});
 </script>
 
 </body>

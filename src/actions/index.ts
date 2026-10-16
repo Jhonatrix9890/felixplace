@@ -288,10 +288,15 @@ export const server = {
       post_id: z.string().uuid(),
       display_name: z.string().trim().min(2).max(80),
       body: z.string().trim().min(2).max(2000),
-      website: z.string().max(0).optional(),
+      website: z.string().trim().max(200).optional(),
     }),
 
-    handler: async ({ post_id, display_name, body }) => {
+    handler: async ({ post_id, display_name, body, website }) => {
+      // Si un bot completa este campo oculto, no guardamos el comentario.
+      if (website) {
+        return { message: 'Tu comentario fue enviado para revisión.' };
+      }
+
       const db = getDatabase();
 
       const [post] = await db.sql<{ id: string }>`

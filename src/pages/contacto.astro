@@ -1,0 +1,259 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { actions } from 'astro:actions';
+
+export const prerender = false;
+
+const result = Astro.getActionResult(actions.submitContactMessage);
+const messageSent = Boolean(result?.data);
+const errorMessage = result?.error?.message;
+---
+
+<BaseLayout
+  title="Contacto y sugerencias | FelixPlace"
+  description="Escribe a FelixPlace para consultas, sugerencias o reportes de errores."
+>
+  <main class="pagina">
+    <header class="encabezado">
+      <p class="etiqueta">HABLEMOS</p>
+      <h1>Contacto y sugerencias</h1>
+      <p>
+        ¿Tienes una consulta, una idea para un tutorial o encontraste un error?
+        Cuéntanos mediante este formulario.
+      </p>
+    </header>
+
+    {messageSent && (
+      <p class="aviso exito" role="status" aria-live="polite">
+        Recibimos tu mensaje. Gracias por escribirnos.
+      </p>
+    )}
+
+    {errorMessage && (
+      <p class="aviso error" role="alert">
+        No se pudo enviar el mensaje. Revisa los campos e inténtalo de nuevo.
+      </p>
+    )}
+
+    <form method="POST" action={actions.submitContactMessage}>
+      <label for="message_type">Motivo del mensaje</label>
+      <select id="message_type" name="message_type" required>
+        <option value="contact">Consulta general</option>
+        <option value="suggestion">Sugerencia</option>
+        <option value="correction">Reporte de error o corrección</option>
+      </select>
+
+      <label for="name">Tu nombre</label>
+      <input
+        id="name"
+        name="name"
+        type="text"
+        minlength="2"
+        maxlength="100"
+        autocomplete="name"
+        required
+      />
+
+      <label for="email">Tu correo electrónico</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        maxlength="254"
+        autocomplete="email"
+        required
+      />
+
+      <label for="subject">Asunto</label>
+      <input
+        id="subject"
+        name="subject"
+        type="text"
+        minlength="3"
+        maxlength="150"
+        required
+      />
+
+      <label for="message">Mensaje</label>
+      <textarea
+        id="message"
+        name="message"
+        minlength="10"
+        maxlength="5000"
+        rows="8"
+        required
+      ></textarea>
+
+      <div class="campo-oculto" aria-hidden="true">
+        <label for="website">Deja este campo vacío</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabindex="-1"
+          autocomplete="off"
+        />
+      </div>
+
+      <label class="consentimiento" for="privacy_consent">
+        <input
+          id="privacy_consent"
+          name="privacy_consent"
+          type="checkbox"
+          value="on"
+          required
+        />
+        <span>
+          Acepto que FelixPlace use los datos ingresados para responder a este
+          mensaje. He leído la
+          <a href="/privacidad">Política de privacidad</a>.
+        </span>
+      </label>
+
+      <button type="submit">Enviar mensaje</button>
+    </form>
+
+    <p class="nota">
+      Tu mensaje quedará pendiente de revisión. No se mostrará públicamente.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(100% - 40px, 760px);
+    margin: 0 auto;
+    padding: 48px 0 16px;
+  }
+
+  .encabezado {
+    margin-bottom: 28px;
+  }
+
+  .etiqueta {
+    margin-bottom: 8px;
+    color: #1769aa;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    color: #172033;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .encabezado > p:last-child,
+  .nota {
+    color: #596579;
+    line-height: 1.7;
+  }
+
+  form {
+    display: grid;
+    gap: 10px;
+    padding: clamp(20px, 5vw, 32px);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgb(23 32 51 / 5%);
+  }
+
+  form > label {
+    margin-top: 10px;
+    color: #172033;
+    font-weight: 700;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #cbd3df;
+    border-radius: 8px;
+    background: #fff;
+    color: #172033;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .consentimiento {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 16px;
+    color: #465166;
+    line-height: 1.5;
+  }
+
+  .consentimiento input {
+    width: auto;
+    margin-top: 4px;
+  }
+
+  .consentimiento a {
+    color: #1769aa;
+    font-weight: 700;
+  }
+
+  button {
+    justify-self: start;
+    margin-top: 12px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #12578f;
+  }
+
+  .aviso {
+    margin: 0 0 18px;
+    padding: 14px;
+    border-radius: 8px;
+    line-height: 1.5;
+  }
+
+  .exito {
+    background: #eaf7ee;
+    color: #176b35;
+  }
+
+  .error {
+    background: #fff1f0;
+    color: #9b2525;
+  }
+
+  .nota {
+    margin-top: 16px;
+    font-size: 0.92rem;
+  }
+
+  .campo-oculto {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 600px) {
+    .pagina {
+      width: min(100% - 32px, 760px);
+      padding-top: 32px;
+    }
+  }
+</style>

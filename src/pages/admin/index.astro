@@ -132,6 +132,10 @@ const estadoPublicacion = (status: string) => {
         </button>
       </header>
 
+      <nav class="atajos-admin" aria-label="Herramientas de administración">
+        <a href="/admin/mensajes">Mensajes de contacto y sugerencias</a>
+      </nav>
+
       {actionError && <p class="aviso error">{actionError}</p>}
       {publishMessage && <p class="aviso">{publishMessage}</p>}
       {moderationMessage && <p class="aviso">{moderationMessage}</p>}
@@ -259,6 +263,25 @@ const estadoPublicacion = (status: string) => {
     color: #172033;
     font-family: Arial, sans-serif;
   }
+
+.atajos-admin {
+  padding: 20px 0 4px;
+}
+
+.atajos-admin a {
+  display: inline-block;
+  padding: 11px 15px;
+  border-radius: 8px;
+  background: #e8f0f8;
+  color: #1769aa;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.atajos-admin a:hover {
+  background: #dceaf6;
+}
+
 
   .panel {
     width: min(100%, 960px);

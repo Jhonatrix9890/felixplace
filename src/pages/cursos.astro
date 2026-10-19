@@ -1,0 +1,273 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getDatabase } from '@netlify/database';
+
+export const prerender = false;
+
+type CourseRow = {
+  title: string;
+  slug: string;
+  summary: string;
+  cover_image_url: string | null;
+  instructor_name: string;
+  level: string | null;
+  language: string;
+  access_model: 'free' | 'paid' | 'external';
+  price: string | number | null;
+  currency: string;
+  checkout_url: string | null;
+};
+
+const db = getDatabase();
+
+const courses = (await db.sql<CourseRow>`
+  SELECT
+    title,
+    slug,
+    summary,
+    cover_image_url,
+    instructor_name,
+    level,
+    language,
+    access_model,
+    price,
+    currency,
+    checkout_url
+  FROM courses
+  WHERE status = 'published'
+  ORDER BY published_at DESC NULLS LAST, created_at DESC
+  LIMIT 24
+`) as CourseRow[];
+
+const modeloAcceso = (model: CourseRow['access_model']) => {
+  if (model === 'free') return 'Gratis';
+  if (model === 'paid') return 'De pago';
+  return 'Curso externo';
+};
+---
+
+<BaseLayout
+  title="Cursos de tecnología"
+  description="Explora cursos de tecnología y aprendizaje práctico en FelixPlace."
+>
+  <main class="pagina">
+    <header class="intro">
+      <p class="etiqueta">APRENDE A TU RITMO</p>
+      <h1>Cursos de tecnología</h1>
+      <p>
+        Estamos preparando cursos prácticos para ayudarte a desarrollar nuevas
+        habilidades tecnológicas.
+      </p>
+    </header>
+
+    {courses.length === 0 ? (
+      <section class="vacio">
+        <h2>Próximamente</h2>
+        <p>
+          Estamos preparando nuestros primeros cursos. Mientras tanto, puedes
+          explorar las noticias y los tutoriales de FelixPlace.
+        </p>
+        <div class="enlaces">
+          <a href="/noticias">Ver noticias</a>
+          <a href="/tutoriales">Ver tutoriales</a>
+        </div>
+      </section>
+    ) : (
+      <section class="catalogo" aria-label="Catálogo de cursos">
+        {courses.map((course) => (
+          <article class="curso">
+            {course.cover_image_url && (
+              <img
+                src={course.cover_image_url}
+                alt={`Portada del curso ${course.title}`}
+                loading="lazy"
+              />
+            )}
+
+            <div class="contenido">
+              <p class="tipo">{modeloAcceso(course.access_model)}</p>
+              <h2>{course.title}</h2>
+              <p class="resumen">{course.summary}</p>
+
+              <dl>
+                <div>
+                  <dt>Instructor</dt>
+                  <dd>{course.instructor_name}</dd>
+                </div>
+
+                {course.level && (
+                  <div>
+                    <dt>Nivel</dt>
+                    <dd>{course.level}</dd>
+                  </div>
+                )}
+
+                <div>
+                  <dt>Idioma</dt>
+                  <dd>{course.language}</dd>
+                </div>
+
+                {course.price !== null && (
+                  <div>
+                    <dt>Precio</dt>
+                    <dd>
+                      {course.currency.trim()} {course.price}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+
+              {course.checkout_url ? (
+                <a
+                  class="boton"
+                  href={course.checkout_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver curso
+                </a>
+              ) : (
+                <span class="proximamente">Más información próximamente</span>
+              )}
+            </div>
+          </article>
+        ))}
+      </section>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(1100px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 52px 0 24px;
+  }
+
+  .intro {
+    max-width: 720px;
+    margin-bottom: 36px;
+  }
+
+  .etiqueta,
+  .tipo {
+    color: #1769aa;
+    font-size: 0.84rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 10px 0;
+    color: #102247;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .intro > p:last-child,
+  .resumen {
+    color: #596579;
+    line-height: 1.7;
+  }
+
+  .catalogo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .curso {
+    overflow: hidden;
+    border: 1px solid #e1e7ef;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 18px #17203312;
+  }
+
+  .curso > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .contenido {
+    padding: 20px;
+  }
+
+  .tipo {
+    margin-top: 0;
+    letter-spacing: 0.04em;
+  }
+
+  .curso h2,
+  .vacio h2 {
+    color: #102247;
+  }
+
+  dl {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0;
+  }
+
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  dt {
+    color: #647084;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .boton {
+    display: inline-block;
+    padding: 11px 16px;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .boton:hover {
+    background: #12558b;
+  }
+
+  .proximamente {
+    color: #647084;
+    font-size: 0.95rem;
+  }
+
+  .vacio {
+    padding: 28px;
+    border: 1px solid #dce5ef;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .vacio p {
+    color: #596579;
+    line-height: 1.7;
+  }
+
+  .enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 20px;
+  }
+
+  .enlaces a {
+    color: #1769aa;
+    font-weight: 700;
+  }
+</style>

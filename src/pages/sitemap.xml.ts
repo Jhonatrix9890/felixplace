@@ -20,6 +20,12 @@ export const GET: APIRoute = async ({ url }) => {
     '/',
     '/noticias',
     '/tutoriales',
+    '/cursos',
+    '/sobre-felixplace',
+    '/contacto',
+    '/privacidad',
+    '/cookies',
+    '/afiliados',
     ...posts.map((post) =>
       post.kind === 'news'
         ? `/noticias/${post.slug}`

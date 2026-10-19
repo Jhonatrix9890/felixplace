@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Divulgación de afiliados"
+  description="Cómo funcionan los enlaces de afiliados en FelixPlace."
+>
+  <main class="pagina">
+    <p class="etiqueta">TRANSPARENCIA</p>
+    <h1>Divulgación de afiliados</h1>
+
+    <p>
+      En algunas publicaciones de FelixPlace recomendamos productos o
+      herramientas que podrían ser útiles para nuestros lectores. Algunos
+      enlaces pueden ser enlaces de afiliados.
+    </p>
+
+    <p>
+      Si compras mediante uno de esos enlaces, FelixPlace podría recibir una
+      comisión, sin que esto implique un costo adicional para ti. La
+      recomendación de un producto no garantiza que sea adecuado para todas las
+      personas: revisa sus características y condiciones antes de comprar.
+    </p>
+
+    <section class="aviso-amazon">
+      <h2>Amazon Associates</h2>
+      <p>
+        As an Amazon Associate I earn from qualifying purchases.
+      </p>
+    </section>
+
+    <p>
+      Cuando publiquemos un enlace de afiliado, indicaremos cerca del enlace
+      que podría generar una comisión. Puedes
+      <a href="/contacto">contactarnos</a> si tienes preguntas.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(820px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 56px 0 24px;
+    color: #172033;
+    line-height: 1.75;
+  }
+
+  .etiqueta {
+    color: #1769aa;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    color: #102247;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    line-height: 1.1;
+  }
+
+  h2 {
+    margin-top: 0;
+    color: #102247;
+    font-size: 1.25rem;
+  }
+
+  .aviso-amazon {
+    margin: 28px 0;
+    padding: 22px;
+    border-left: 4px solid #1769aa;
+    border-radius: 8px;
+    background: #eaf1f8;
+  }
+
+  .aviso-amazon p {
+    margin-bottom: 0;
+    font-weight: 700;
+  }
+
+  a {
+    color: #1769aa;
+    font-weight: 700;
+  }
+</style>

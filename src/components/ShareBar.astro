@@ -1,0 +1,120 @@
+---
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+
+const facebookUrl = new URL('https://www.facebook.com/sharer/sharer.php');
+facebookUrl.searchParams.set('u', url);
+
+const whatsappUrl = new URL('https://wa.me/');
+whatsappUrl.searchParams.set('text', `${title} ${url}`);
+---
+
+<section class="compartir" aria-label="Compartir publicación">
+  <h2>Comparte esta publicación</h2>
+
+  <div class="acciones">
+    <a
+      class="boton"
+      href={facebookUrl.toString()}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Facebook
+    </a>
+
+    <a
+      class="boton"
+      href={whatsappUrl.toString()}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      WhatsApp
+    </a>
+
+    <button class="boton copiar" type="button" data-copy-url={url}>
+      Copiar enlace
+    </button>
+  </div>
+
+  <p class="estado-copia" aria-live="polite"></p>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-copy-url]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const url = button.dataset.copyUrl;
+      const estado = button
+        .closest('.compartir')
+        ?.querySelector<HTMLElement>('.estado-copia');
+
+      if (!url || !estado) return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+        estado.textContent = 'Enlace copiado.';
+      } catch {
+        estado.textContent =
+          'No se pudo copiar automáticamente. Copia la dirección desde el navegador.';
+      }
+    });
+  });
+</script>
+
+<style>
+  .compartir {
+    margin: 24px 0;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  h2 {
+    margin: 0 0 14px;
+    color: #172033;
+    font-size: 1.1rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .boton {
+    display: inline-block;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .boton:hover {
+    background: #12558b;
+  }
+
+  .copiar {
+    background: #e8f0f8;
+    color: #1769aa;
+  }
+
+  .copiar:hover {
+    background: #dce9f5;
+  }
+
+  .estado-copia {
+    min-height: 1.4em;
+    margin: 10px 0 0;
+    color: #596579;
+    font-size: 0.9rem;
+  }
+</style>

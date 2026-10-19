@@ -11,10 +11,7 @@ if (!user) {
   return Astro.redirect('/admin/login');
 }
 
-const tieneAccesoEditorial =
-  user.roles?.some((role) => role === 'admin' || role === 'editor') ?? false;
-
-if (!tieneAccesoEditorial) {
+if (!user.roles?.some((role) => role === 'admin' || role === 'editor')) {
   return new Response('Tu cuenta no tiene permiso para editar publicaciones.', {
     status: 403,
   });
@@ -37,6 +34,7 @@ const [post] = await db.sql`
     slug,
     category,
     image_url,
+    video_url,
     image_alt,
     description,
     body_markdown,
@@ -55,6 +53,7 @@ if (!post) {
 const errorMessage = actionResult?.error?.message;
 const guardado = Astro.url.searchParams.get('guardado') === '1';
 const esPublicada = post?.status === 'published';
+const esTutorial = post?.kind === 'tutorial';
 ---
 
 <!doctype html>
@@ -107,9 +106,7 @@ const esPublicada = post?.status === 'published';
             </select>
 
             {esPublicada && (
-              <small>
-                No se puede cambiar el tipo de una publicación publicada.
-              </small>
+              <small>No se puede cambiar el tipo de una publicación publicada.</small>
             )}
 
             <label for="title">Título</label>
@@ -117,6 +114,7 @@ const esPublicada = post?.status === 'published';
               id="title"
               name="title"
               type="text"
+              minlength="5"
               maxlength="180"
               value={post.title}
               required
@@ -148,24 +146,55 @@ const esPublicada = post?.status === 'published';
               value={post.category ?? ''}
             />
 
-            <label for="image_url">URL de la imagen de Postimages</label>
-            <input
-              id="image_url"
-              name="image_url"
-              type="url"
-              maxlength="2048"
-              placeholder="https://..."
-              value={post.image_url ?? ''}
-            />
+            <fieldset
+              id="campos-imagen"
+              hidden={esTutorial}
+              disabled={esTutorial}
+            >
+              <legend>Imagen de la noticia</legend>
 
-            <label for="image_alt">Texto alternativo de la imagen</label>
-            <input
-              id="image_alt"
-              name="image_alt"
-              type="text"
-              maxlength="200"
-              value={post.image_alt ?? ''}
-            />
+              <label for="image_url">URL de la imagen de Postimages</label>
+              <input
+                id="image_url"
+                name="image_url"
+                type="url"
+                maxlength="2048"
+                placeholder="https://..."
+                value={post.image_url ?? ''}
+              />
+
+              <label for="image_alt">Texto alternativo de la imagen</label>
+              <input
+                id="image_alt"
+                name="image_alt"
+                type="text"
+                maxlength="200"
+                value={post.image_alt ?? ''}
+              />
+            </fieldset>
+
+            <fieldset
+              id="campos-video"
+              hidden={!esTutorial}
+              disabled={!esTutorial}
+            >
+              <legend>Video del tutorial</legend>
+
+              <label for="video_url">Enlace del video de YouTube</label>
+              <input
+                id="video_url"
+                name="video_url"
+                type="url"
+                maxlength="2048"
+                placeholder="https://youtu.be/..."
+                value={post.video_url ?? ''}
+              />
+
+              <small>
+                Pega el enlace normal del video. El sitio lo mostrará en un
+                reproductor dentro del tutorial.
+              </small>
+            </fieldset>
 
             <label for="description">Descripción breve</label>
             <textarea
@@ -175,13 +204,13 @@ const esPublicada = post?.status === 'published';
               maxlength="350"
             >{post.description ?? ''}</textarea>
 
-            <label for="body_markdown">Contenido</label>
+            <label for="body_markdown">Contenido o explicación</label>
             <textarea
               id="body_markdown"
               name="body_markdown"
               rows="14"
               maxlength="50000"
-              placeholder="Escribe aquí el contenido de la publicación."
+              placeholder="Puedes añadir contexto, pasos o información complementaria."
             >{post.body_markdown ?? ''}</textarea>
 
             <label for="seo_title">Título SEO (opcional)</label>
@@ -213,6 +242,37 @@ const esPublicada = post?.status === 'published';
     </main>
 
     <script>
+      const kindInput = document.querySelector<HTMLSelectElement>('#kind');
+      const imageFields = document.querySelector<HTMLFieldSetElement>(
+        '#campos-imagen',
+      );
+      const videoFields = document.querySelector<HTMLFieldSetElement>(
+        '#campos-video',
+      );
+      const videoInput =
+        document.querySelector<HTMLInputElement>('#video_url');
+
+      function actualizarCamposTipo() {
+        const esTutorial = kindInput?.value === 'tutorial';
+
+        if (imageFields) {
+          imageFields.hidden = Boolean(esTutorial);
+          imageFields.disabled = Boolean(esTutorial);
+        }
+
+        if (videoFields) {
+          videoFields.hidden = !esTutorial;
+          videoFields.disabled = !esTutorial;
+        }
+
+        if (videoInput) {
+          videoInput.required = Boolean(esTutorial);
+        }
+      }
+
+      kindInput?.addEventListener('change', actualizarCamposTipo);
+      actualizarCamposTipo();
+
       const titleInput = document.querySelector<HTMLInputElement>('#title');
       const slugInput = document.querySelector<HTMLInputElement>('#slug');
 
@@ -248,6 +308,10 @@ const esPublicada = post?.status === 'published';
 </html>
 
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     margin: 0;
     padding: 24px;
@@ -281,6 +345,7 @@ const esPublicada = post?.status === 'published';
   .ayuda,
   small {
     color: #596579;
+    line-height: 1.5;
   }
 
   form {
@@ -289,7 +354,8 @@ const esPublicada = post?.status === 'published';
     margin-top: 28px;
   }
 
-  label {
+  label,
+  legend {
     margin-top: 10px;
     font-weight: 700;
   }
@@ -297,7 +363,6 @@ const esPublicada = post?.status === 'published';
   input,
   select,
   textarea {
-    box-sizing: border-box;
     width: 100%;
     padding: 12px;
     border: 1px solid #cbd3df;
@@ -310,6 +375,24 @@ const esPublicada = post?.status === 'published';
     resize: vertical;
   }
 
+  fieldset {
+    display: grid;
+    gap: 10px;
+    margin: 12px 0 0;
+    padding: 16px;
+    border: 1px solid #d9e1ec;
+    border-radius: 10px;
+  }
+
+  fieldset[hidden] {
+    display: none;
+  }
+
+  legend {
+    padding: 0 6px;
+    color: #102247;
+  }
+
   button {
     margin-top: 18px;
     padding: 14px 18px;
@@ -320,6 +403,10 @@ const esPublicada = post?.status === 'published';
     font: inherit;
     font-weight: 700;
     cursor: pointer;
+  }
+
+  button:hover {
+    background: #12588f;
   }
 
   .mensaje {
@@ -338,6 +425,10 @@ const esPublicada = post?.status === 'published';
   }
 
   @media (max-width: 600px) {
+    body {
+      padding: 16px;
+    }
+
     .panel {
       padding: 22px;
     }

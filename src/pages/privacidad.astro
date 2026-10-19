@@ -1,0 +1,215 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const fechaActualizacion = new Intl.DateTimeFormat('es-EC', {
+  dateStyle: 'long',
+}).format(new Date());
+---
+
+<BaseLayout
+  title="Política de privacidad | FelixPlace"
+  description="Información sobre los datos que FelixPlace recoge y cómo se utilizan."
+>
+  <main class="pagina">
+    <header class="encabezado">
+      <p class="etiqueta">INFORMACIÓN Y PRIVACIDAD</p>
+      <h1>Política de privacidad</h1>
+      <p>Última actualización: {fechaActualizacion}</p>
+    </header>
+
+    <p class="pendiente">
+      <strong>Pendiente antes de publicar:</strong> completa la identidad del
+      responsable del sitio y sus datos públicos de contacto.
+    </p>
+
+    <section class="bloque">
+      <h2>1. Responsable del tratamiento</h2>
+      <p>
+        El responsable del tratamiento de los datos personales de este sitio es:
+      </p>
+      <ul>
+        <li><strong>Responsable:</strong> Ing. Silva Moran Jonathan Javier</li>
+        <li><strong>Correo de contacto:</strong> felixplace13@gmail.com</li>
+        <li><strong>Dirección para notificaciones:</strong> La Gazca-Quito-Ecuador</li>
+      </ul>
+    </section>
+
+    <section class="bloque">
+      <h2>2. Datos que podemos recibir</h2>
+      <p>
+        Si envías un comentario, recibimos el nombre que escribas y el contenido
+        del comentario. Los comentarios quedan pendientes de revisión y solo se
+        muestran públicamente si son aprobados.
+      </p>
+      <p>
+        Si utilizas el formulario de contacto, recibimos tu nombre, correo
+        electrónico, asunto, tipo de mensaje y el texto que escribas.
+      </p>
+      <p>
+        Las cuentas administrativas utilizan datos de acceso gestionados por
+        Netlify Identity. No solicitamos contraseñas de visitantes.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>3. Para qué utilizamos esos datos</h2>
+      <ul>
+        <li>Revisar y, cuando corresponda, publicar comentarios.</li>
+        <li>Leer y responder consultas, sugerencias o reportes de errores.</li>
+        <li>Proteger el panel de administración y gestionar las publicaciones.</li>
+      </ul>
+      <p>
+        No pedimos que incluyas información sensible en comentarios o mensajes.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>4. Dónde se almacenan</h2>
+      <p>
+        Las publicaciones, los comentarios y los mensajes del formulario se
+        almacenan en una base de datos de Netlify. Netlify también proporciona
+        servicios de alojamiento e inicio de sesión para la administración.
+      </p>
+      <p>
+        Las páginas pueden cargar videos de YouTube y las imágenes de noticias
+        pueden estar alojadas en un proveedor externo, como Postimages. Al
+        cargar esos recursos, el navegador se conecta con el proveedor
+        correspondiente y se aplican sus políticas.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>5. Tiempo de conservación</h2>
+      <p>
+        Los mensajes de contacto se conservarán mientras se revisan y gestionan.
+        Los comentarios aprobados podrán permanecer visibles mientras la
+        publicación esté disponible. Los datos que ya no sean necesarios podrán
+        eliminarse, salvo que deban conservarse para atender obligaciones o
+        reclamos.
+      </p>
+      <p>
+        FelixPlace revisará y definirá un plazo de conservación más específico
+        conforme crezca el servicio.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>6. Cookies, anuncios y enlaces de afiliado</h2>
+      <p>
+        El acceso al panel administrativo puede requerir almacenamiento técnico
+        de sesión. Los videos y otros servicios externos pueden utilizar sus
+        propias tecnologías según sus políticas.
+      </p>
+      <p>
+        A la fecha de esta política, FelixPlace no ha integrado anuncios de
+        Google AdSense. Si se incorporan anuncios, analítica o enlaces de
+        afiliado, esta política se actualizará y se informará de forma clara.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>7. Tus derechos y cómo ejercerlos</h2>
+      <p>
+        Puedes solicitar información sobre tus datos, pedir su actualización o
+        eliminación y ejercer los demás derechos aplicables. Para hacerlo,
+        escríbenos desde la página de
+        <a href="/contacto">contacto</a> e indica qué solicitud deseas realizar.
+      </p>
+      <p>
+        También puedes consultar información oficial sobre tus derechos en la
+        <a
+          href="https://www.spdp.gob.ec/docs/proteccion-de-datos-personales/cuales-son-mis-derechos/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Superintendencia de Protección de Datos Personales
+        </a>.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>8. Cambios a esta política</h2>
+      <p>
+        Esta página puede actualizarse cuando cambien las funciones o servicios
+        de FelixPlace. La fecha de actualización aparecerá al inicio.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(100% - 40px, 860px);
+    margin: 0 auto;
+    padding: 48px 0 16px;
+  }
+
+  .encabezado {
+    margin-bottom: 28px;
+  }
+
+  .etiqueta {
+    margin-bottom: 8px;
+    color: #1769aa;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0 0 10px;
+    color: #172033;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    line-height: 1.1;
+  }
+
+  .encabezado > p:last-child {
+    color: #647084;
+  }
+
+  .pendiente {
+    padding: 16px;
+    border: 1px solid #f0cf7a;
+    border-radius: 10px;
+    background: #fff8e6;
+    color: #674c12;
+    line-height: 1.6;
+  }
+
+  .bloque {
+    margin: 20px 0;
+    padding: clamp(20px, 4vw, 28px);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgb(23 32 51 / 5%);
+  }
+
+  .bloque h2 {
+    margin-top: 0;
+    color: #172033;
+    font-size: 1.35rem;
+  }
+
+  .bloque p,
+  .bloque li {
+    color: #465166;
+    line-height: 1.75;
+  }
+
+  .bloque li + li {
+    margin-top: 6px;
+  }
+
+  .bloque a {
+    color: #1769aa;
+    font-weight: 700;
+  }
+
+  @media (max-width: 600px) {
+    .pagina {
+      width: min(100% - 32px, 860px);
+      padding-top: 32px;
+    }
+  }
+</style>

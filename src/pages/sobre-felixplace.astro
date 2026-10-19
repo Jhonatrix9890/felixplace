@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Sobre FelixPlace | Tecnología para todos"
+  description="Conoce FelixPlace, un espacio de noticias y tutoriales de tecnología explicados con claridad."
+>
+  <main class="pagina">
+    <header class="encabezado">
+      <p class="etiqueta">QUIÉNES SOMOS</p>
+      <h1>Tecnología para todos</h1>
+      <p class="introduccion">
+        FelixPlace es un espacio para descubrir novedades y aprender a usar la
+        tecnología mediante explicaciones claras y prácticas.
+      </p>
+    </header>
+
+    <section class="bloque">
+      <h2>¿Qué encontrarás aquí?</h2>
+      <p>
+        Publicamos noticias sobre tecnología y tutoriales paso a paso. Queremos
+        que cada contenido sea útil tanto para quienes recién empiezan como para
+        quienes desean conocer mejor las herramientas que usan cada día.
+      </p>
+    </section>
+
+    <section class="bloque">
+      <h2>Nuestros contenidos</h2>
+
+      <div class="tarjetas">
+        <article class="tarjeta">
+          <h3>Noticias</h3>
+          <p>
+            Información y novedades del mundo tecnológico presentadas de forma
+            sencilla y comprensible.
+          </p>
+          <a href="/noticias">Explorar noticias →</a>
+        </article>
+
+        <article class="tarjeta">
+          <h3>Tutoriales</h3>
+          <p>
+            Guías y videos para aprender a configurar, resolver problemas y
+            aprovechar mejor programas y dispositivos.
+          </p>
+          <a href="/tutoriales">Ver tutoriales →</a>
+        </article>
+
+        <article class="tarjeta">
+          <h3>Cursos</h3>
+          <p>
+            FelixPlace se proyecta a ofrecer cursos organizados para aprender
+            tecnología con mayor profundidad. Esta sección se irá desarrollando.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h2>Nuestro compromiso</h2>
+      <p>
+        Buscamos explicar cada tema con claridad, mantener el contenido
+        organizado y corregirlo cuando encontremos información que deba
+        actualizarse. Si tienes una sugerencia o detectas un error, pronto
+        podrás escribirnos desde la página de contacto.
+      </p>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(100% - 40px, 1000px);
+    margin: 0 auto;
+    padding: 48px 0 16px;
+  }
+
+  .encabezado {
+    max-width: 760px;
+    margin-bottom: 42px;
+  }
+
+  .etiqueta {
+    margin-bottom: 10px;
+    color: #1769aa;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  h1 {
+    margin: 0 0 14px;
+    color: #172033;
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    line-height: 1.08;
+  }
+
+  .introduccion {
+    color: #596579;
+    font-size: 1.2rem;
+    line-height: 1.7;
+  }
+
+  .bloque {
+    margin: 0 0 32px;
+    padding: clamp(22px, 4vw, 32px);
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgb(23 32 51 / 5%);
+  }
+
+  .bloque h2 {
+    margin: 0 0 14px;
+    color: #172033;
+    font-size: 1.6rem;
+  }
+
+  .bloque > p {
+    margin-bottom: 0;
+    color: #465166;
+    line-height: 1.8;
+  }
+
+  .tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .tarjeta {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+  }
+
+  .tarjeta h3 {
+    margin-top: 0;
+    color: #172033;
+  }
+
+  .tarjeta p {
+    color: #596579;
+    line-height: 1.65;
+  }
+
+  .tarjeta a {
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .tarjeta a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 600px) {
+    .pagina {
+      width: min(100% - 32px, 1000px);
+      padding-top: 32px;
+    }
+  }
+</style>

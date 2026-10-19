@@ -1,0 +1,85 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Página no encontrada"
+  description="No encontramos esta página en FelixPlace."
+>
+  <main class="pagina">
+    <p class="codigo">404</p>
+    <h1>Esta página no está disponible</h1>
+    <p>
+      Puede que la dirección haya cambiado o que el contenido ya no exista.
+      Puedes volver al inicio o explorar nuestras publicaciones.
+    </p>
+
+    <nav class="enlaces" aria-label="Opciones">
+      <a class="boton principal" href="/">Ir al inicio</a>
+      <a class="boton" href="/noticias">Ver noticias</a>
+      <a class="boton" href="/tutoriales">Ver tutoriales</a>
+    </nav>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(760px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: clamp(64px, 12vw, 120px) 0;
+    text-align: center;
+  }
+
+  .codigo {
+    margin: 0;
+    color: #1769aa;
+    font-size: clamp(4rem, 14vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  h1 {
+    margin: 20px 0 12px;
+    color: #102247;
+    font-size: clamp(2rem, 6vw, 3rem);
+  }
+
+  .pagina > p:not(.codigo) {
+    max-width: 560px;
+    margin: 0 auto;
+    color: #596579;
+    line-height: 1.7;
+  }
+
+  .enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .boton {
+    display: inline-block;
+    padding: 12px 18px;
+    border: 1px solid #cbd7e5;
+    border-radius: 8px;
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .boton:hover {
+    background: #eaf1f8;
+  }
+
+  .boton.principal {
+    border-color: #1769aa;
+    background: #1769aa;
+    color: #fff;
+  }
+
+  .boton.principal:hover {
+    background: #12558b;
+  }
+</style>

@@ -1,0 +1,385 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogType?: 'website' | 'article';
+  ogImage?: string;
+  ogImageAlt?: string;
+}
+
+const {
+  title = 'FelixPlace | Tecnología para todos',
+  description = 'Noticias y tutoriales de tecnología explicados de forma clara.',
+  canonical,
+  ogType = 'website',
+  ogImage,
+  ogImageAlt = '',
+} = Astro.props;
+
+const siteUrl = Astro.site ?? new URL('https://felixplace.com');
+const canonicalUrl =
+  canonical ?? new URL(Astro.url.pathname, siteUrl).toString();
+
+const anio = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <title>{title}</title>
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="FelixPlace" />
+    <meta property="og:locale" content="es_EC" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+
+    {ogImage && (
+      <>
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:alt" content={ogImageAlt} />
+      </>
+    )}
+
+    <meta
+      name="twitter:card"
+      content={ogImage ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
+
+    <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/assets/favicon.png" />
+
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a class="saltar-contenido" href="#contenido">Ir al contenido</a>
+
+    <header class="encabezado">
+      <div class="encabezado-interior">
+        <a class="marca" href="/" aria-label="FelixPlace, página principal">
+          <img src="/assets/logo.png" alt="" width="44" height="48" />
+          <span>Felix<span class="marca-acento">Place</span></span>
+        </a>
+
+        <nav class="navegacion" aria-label="Navegación principal">
+          <a href="/">Inicio</a>
+          <a href="/noticias">Noticias</a>
+          <a href="/tutoriales">Tutoriales</a>
+          <a href="/cursos">Cursos</a>
+          <a href="/sobre-felixplace">Sobre FelixPlace</a>
+          <a class="enlace-buscar" href="/buscar" aria-label="Buscar en FelixPlace">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8" />
+              <path d="m16 16 5 5" />
+            </svg>
+            <span>Buscar</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <div id="contenido">
+      <slot />
+    </div>
+
+    <footer class="pie">
+      <div class="pie-interior">
+        <a class="marca-pie" href="/">FelixPlace</a>
+        <p>Tecnología explicada de forma clara para todos.</p>
+
+        <nav class="navegacion-pie" aria-label="Navegación del pie de página">
+          <a href="/">Inicio</a>
+          <a href="/noticias">Noticias</a>
+          <a href="/tutoriales">Tutoriales</a>
+          <a href="/cursos">Cursos</a>
+          <a href="/sobre-felixplace">Sobre FelixPlace</a>
+          <a href="/contacto">Contacto y sugerencias</a>
+          <a href="/privacidad">Privacidad</a>
+          <a href="/cookies">Política de cookies</a>
+          <a href="/afiliados">Divulgación de afiliados</a>
+          
+        </nav>
+
+        <nav class="redes-sociales" aria-label="Redes sociales de FelixPlace">
+          <a
+            href="https://www.facebook.com/felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook de FelixPlace"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.09 4.39 23.08 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.54-4.69 1.31 0 2.68.24 2.68.24v2.96h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.32l-.53 3.49h-2.79V24C19.61 23.08 24 18.09 24 12.07Z"
+              />
+            </svg>
+            <span>Facebook</span>
+          </a>
+
+          <a
+            href="https://www.youtube.com/@felixplace2947"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube de FelixPlace"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M23.5 6.2a3 3 0 0 0-2.1-2.12C19.55 3.56 12 3.56 12 3.56s-7.55 0-9.4.52A3 3 0 0 0 .5 6.2 31.3 31.3 0 0 0 0 12a31.3 31.3 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.12c1.85.52 9.4.52 9.4.52s7.55 0 9.4-.52a3 3 0 0 0 2.1-2.12A31.3 31.3 0 0 0 24 12a31.3 31.3 0 0 0-.5-5.8ZM9.55 15.6V8.4L15.82 12l-6.27 3.6Z"
+              />
+            </svg>
+            <span>YouTube</span>
+          </a>
+
+          <a
+            href="https://www.tiktok.com/@felixplace13"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok de FelixPlace"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M19.59 6.69a4.83 4.83 0 0 1-4.22-4.22V2h-3.45v13.67a2.89 2.89 0 0 1-2.89 2.89 2.89 2.89 0 0 1 0-5.78c.3 0 .59.05.86.13v-3.52a6.4 6.4 0 0 0-.86-.06 6.34 6.34 0 1 0 6.34 6.34V8.74a8.2 8.2 0 0 0 4.8 1.55V6.84c-.2 0-.39-.05-.58-.15Z"
+              />
+            </svg>
+            <span>TikTok</span>
+          </a>
+</nav>
+
+        <small>© {anio} FelixPlace. Todos los derechos reservados.</small>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #172033;
+    background: #f4f7fb;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  a:focus-visible {
+    outline: 3px solid #16c8ee;
+    outline-offset: 4px;
+  }
+
+  .saltar-contenido {
+    position: absolute;
+    top: 8px;
+    left: -10000px;
+    z-index: 10;
+    padding: 10px 14px;
+    border-radius: 6px;
+    background: #fff;
+    color: #102247;
+  }
+
+  .saltar-contenido:focus {
+    left: 8px;
+  }
+
+  .encabezado {
+    background: #081a3b;
+    color: #fff;
+    border-bottom: 3px solid #16c8ee;
+  }
+
+  .encabezado-interior {
+    width: min(1160px, calc(100% - 40px));
+    min-height: 78px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+  }
+
+  .marca img {
+    display: block;
+    width: 40px;
+    height: 46px;
+    object-fit: contain;
+  }
+
+  .marca-acento {
+    color: #16c8ee;
+  }
+
+  .navegacion,
+  .navegacion-pie {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .navegacion a {
+    padding: 10px 13px;
+    border-radius: 7px;
+    color: #e8f2ff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .navegacion a:hover {
+    background: #122a55;
+    color: #fff;
+  }
+
+  .pie {
+    margin-top: 56px;
+    background: #081a3b;
+    color: #e8f2ff;
+  }
+
+  .pie-interior {
+    width: min(1160px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 32px 0 22px;
+  }
+
+  .marca-pie {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .pie p {
+    margin: 8px 0 18px;
+    color: #c4d2e8;
+  }
+
+  .navegacion-pie {
+    margin-bottom: 18px;
+  }
+
+  .navegacion-pie a,
+  .redes-sociales a {
+    color: #c4d2e8;
+    text-decoration: none;
+  }
+
+  .navegacion-pie a:hover,
+  .redes-sociales a:hover {
+    color: #16c8ee;
+  }
+
+  .redes-sociales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 0 0 24px;
+  }
+
+  .redes-sociales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 0 0 24px;
+}
+
+.redes-sociales a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #c4d2e8;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.redes-sociales a:hover {
+  color: #16c8ee;
+}
+
+.redes-sociales svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+}
+
+  .redes-sociales a {
+    font-weight: 700;
+  }
+
+  .pie small {
+    display: block;
+    padding-top: 16px;
+    border-top: 1px solid #294064;
+    color: #c4d2e8;
+  }
+  .navegacion .enlace-buscar {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.enlace-buscar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+  @media (max-width: 600px) {
+    .encabezado-interior {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 0;
+    }
+
+    .navegacion {
+      gap: 2px;
+    }
+
+    .navegacion a {
+      padding: 9px 10px;
+    }
+  }
+</style>

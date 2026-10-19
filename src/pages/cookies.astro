@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Política de cookies"
+  description="Información sobre cookies y servicios externos en FelixPlace."
+>
+  <main class="pagina">
+    <p class="etiqueta">TRANSPARENCIA</p>
+    <h1>Política de cookies</h1>
+    <p class="actualizacion">Última actualización: 19 de octubre de 2026</p>
+
+    <section>
+      <h2>¿Qué son las cookies?</h2>
+      <p>
+        Son pequeños archivos o identificadores que un sitio web puede guardar
+        en tu dispositivo para recordar información o permitir que ciertos
+        servicios funcionen.
+      </p>
+    </section>
+
+    <section>
+      <h2>Uso en FelixPlace</h2>
+      <p>
+        FelixPlace utiliza servicios externos para funciones concretas. Por
+        ejemplo, Netlify Identity permite el acceso al panel de administración.
+        Las páginas públicas no requieren iniciar sesión para leer noticias,
+        tutoriales o enviar comentarios.
+      </p>
+      <p>
+        En los tutoriales podemos mostrar videos de YouTube mediante su modo de
+        privacidad mejorada (<code>youtube-nocookie.com</code>). Este modo
+        limita la personalización basada en la reproducción, pero al reproducir
+        un video YouTube puede recibir información técnica de tu navegador y
+        dispositivo.
+      </p>
+      <p>
+        Algunas noticias pueden mostrar imágenes alojadas en Postimages. Al
+        cargarlas, tu navegador se conecta con ese servicio externo.
+      </p>
+    </section>
+
+    <section>
+      <h2>Publicidad y medición</h2>
+      <p>
+        Actualmente no hemos integrado Google AdSense ni herramientas de
+        analítica en esta nueva plataforma. Si añadimos servicios que utilicen
+        cookies opcionales, actualizaremos esta política y explicaremos cómo
+        gestionar las preferencias correspondientes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Cómo administrar las cookies</h2>
+      <p>
+        Puedes revisar o eliminar cookies desde la configuración de tu
+        navegador. Si bloqueas ciertos elementos, algunas funciones de servicios
+        externos —como la reproducción de videos— podrían no estar disponibles.
+      </p>
+    </section>
+
+    <p class="enlace">
+      Revisa también nuestra <a href="/privacidad">política de privacidad</a> o
+      <a href="/contacto">escríbenos</a> si tienes preguntas.
+    </p>
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(820px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 56px 0 24px;
+    line-height: 1.75;
+  }
+
+  .etiqueta {
+    color: #1769aa;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+  }
+
+  h1 {
+    margin-bottom: 8px;
+    color: #102247;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    line-height: 1.1;
+  }
+
+  .actualizacion {
+    margin-bottom: 36px;
+    color: #647084;
+  }
+
+  section {
+    margin: 28px 0;
+  }
+
+  h2 {
+    color: #102247;
+    font-size: 1.35rem;
+  }
+
+  a {
+    color: #1769aa;
+    font-weight: 700;
+  }
+
+  code {
+    overflow-wrap: anywhere;
+  }
+
+  .enlace {
+    margin-top: 36px;
+  }
+</style>

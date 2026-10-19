@@ -593,6 +593,60 @@ export const server = {
     },
   }),
 
+  publishCourse: defineAction({
+    accept: 'form',
+
+    input: z.object({
+      id: z.string().uuid(),
+    }),
+
+    handler: async ({ id }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para publicar un curso.',
+        });
+      }
+
+      if (!tienePermisoEditorial(user.roles)) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Tu cuenta no tiene permiso para publicar cursos.',
+        });
+      }
+
+      const db = getDatabase();
+
+      const [course] = await db.sql<{ id: string; title: string }>`
+        UPDATE courses
+        SET
+          status = 'published',
+          published_at = COALESCE(published_at, NOW()),
+          updated_at = NOW()
+        WHERE id = ${id}
+          AND status IN ('draft', 'review')
+          AND (
+            (access_model = 'free')
+            OR (access_model = 'paid' AND price IS NOT NULL)
+            OR (access_model = 'external' AND checkout_url IS NOT NULL)
+          )
+        RETURNING id, title
+      `;
+
+      if (!course) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message:
+            'No se encontró un borrador listo para publicar. Verifica que los cursos de pago tengan precio y los externos tengan un enlace.',
+        });
+      }
+
+      return { id: course.id, title: course.title };
+    },
+  }),
+
   submitContactMessage: defineAction({
     accept: 'form',
 

@@ -9,42 +9,75 @@ Astro.response.headers.set(
   'public, s-maxage=300, stale-while-revalidate=300',
 );
 
+type HomePost = {
+  kind: 'news' | 'tutorial';
+  title: string;
+  slug: string;
+  category: string | null;
+  image_url: string | null;
+  image_alt: string | null;
+  description: string | null;
+  video_url: string | null;
+};
+
 const db = getDatabase();
 
-const posts = await db.sql`
-  SELECT kind, title, slug, category, image_url, image_alt, description
+const posts = await db.sql<HomePost>`
+  SELECT
+    kind,
+    title,
+    slug,
+    category,
+    image_url,
+    image_alt,
+    description,
+    video_url
   FROM posts
   WHERE status = 'published'
   ORDER BY published_at DESC NULLS LAST, created_at DESC
   LIMIT 6
 `;
 
-const organizacionJsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'FelixPlace',
-  url: 'https://felixplace.com/',
-  logo: 'https://felixplace.com/assets/logo.png',
-  sameAs: [
-    'https://www.facebook.com/felixplace13',
-    'https://www.youtube.com/@felixplace2947',
-    'https://www.tiktok.com/@felixplace13',
-  ],
-  description:
-    'Noticias y tutoriales de tecnología explicados de forma clara.',
-}).replace(/</g, '\\u003c');
+function obtenerMiniaturaYoutube(url: string | null): string | null {
+  if (!url) return null;
+
+  try {
+    const parsedUrl = new URL(url);
+    const host = parsedUrl.hostname.toLowerCase();
+    let videoId = '';
+
+    if (parsedUrl.protocol !== 'https:') return null;
+
+    if (host === 'youtu.be') {
+      videoId = parsedUrl.pathname.split('/').filter(Boolean)[0] ?? '';
+    } else if (
+      host === 'youtube.com' ||
+      host === 'www.youtube.com' ||
+      host === 'm.youtube.com'
+    ) {
+      if (parsedUrl.pathname === '/watch') {
+        videoId = parsedUrl.searchParams.get('v') ?? '';
+      } else if (
+        parsedUrl.pathname.startsWith('/shorts/') ||
+        parsedUrl.pathname.startsWith('/embed/')
+      ) {
+        videoId = parsedUrl.pathname.split('/').filter(Boolean)[1] ?? '';
+      }
+    }
+
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return null;
+
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  } catch {
+    return null;
+  }
+}
 ---
 
 <BaseLayout
   title="FelixPlace | Tecnología para todos"
   description="Noticias, tutoriales y cursos de tecnología explicados con claridad."
 >
-  <script
-    slot="head"
-    type="application/ld+json"
-    set:html={organizacionJsonLd}
-  ></script>
-
   <main>
     <section class="portada">
       <p class="etiqueta">TECNOLOGÍA PARA TODOS</p>
@@ -80,14 +113,35 @@ const organizacionJsonLd = JSON.stringify({
             const ruta = esTutorial
               ? `/tutoriales/${post.slug}`
               : `/noticias/${post.slug}`;
+            const miniatura = esTutorial
+              ? obtenerMiniaturaYoutube(post.video_url)
+              : null;
 
             return (
               <article class="tarjeta">
                 {esTutorial ? (
-                  <div class="video-etiqueta" aria-label="Tutorial en video">
-                    <span aria-hidden="true">▶</span>
-                    <span>Tutorial en video</span>
-                  </div>
+                  <a
+                    class="video-portada"
+                    href={ruta}
+                    aria-label={`Ver tutorial: ${post.title}`}
+                  >
+                    {miniatura ? (
+                      <img
+                        src={miniatura}
+                        alt={`Miniatura del video: ${post.title}`}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    ) : (
+                      <div class="video-sin-miniatura" aria-hidden="true">
+                        <span>FELIXPLACE</span>
+                        <small>TUTORIAL EN VIDEO</small>
+                      </div>
+                    )}
+
+                    <span class="boton-reproducir" aria-hidden="true">▶</span>
+                    <span class="etiqueta-video">Tutorial en video</span>
+                  </a>
                 ) : post.image_url ? (
                   <img
                     class="imagen"
@@ -97,11 +151,14 @@ const organizacionJsonLd = JSON.stringify({
                     decoding="async"
                   />
                 ) : (
-                  <div class="imagen-vacia" aria-hidden="true">FELIXPLACE</div>
+                  <div class="imagen-vacia" aria-hidden="true">
+                    FELIXPLACE
+                  </div>
                 )}
 
                 <p class="categoria">
-                  {post.category || (esTutorial ? 'Tutorial' : 'Noticia')}
+                  {post.category ||
+                    (esTutorial ? 'Tutorial' : 'Noticia')}
                 </p>
 
                 <h3><a href={ruta}>{post.title}</a></h3>
@@ -227,12 +284,13 @@ const organizacionJsonLd = JSON.stringify({
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
     gap: 20px;
   }
 
   .tarjeta {
     display: flex;
+    min-width: 0;
     min-height: 320px;
     flex-direction: column;
     align-items: flex-start;
@@ -245,7 +303,7 @@ const organizacionJsonLd = JSON.stringify({
 
   .imagen,
   .imagen-vacia,
-  .video-etiqueta {
+  .video-portada {
     width: 100%;
     aspect-ratio: 16 / 9;
     border-radius: 8px;
@@ -256,30 +314,77 @@ const organizacionJsonLd = JSON.stringify({
   }
 
   .imagen-vacia,
-  .video-etiqueta {
+  .video-sin-miniatura {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
     background: #edf2f7;
     color: #526176;
     font-size: 0.9rem;
     font-weight: 700;
   }
 
-  .video-etiqueta {
-    background: #eaf2f9;
-    color: #1769aa;
+  .video-portada {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: #edf2f7;
   }
 
-  .video-etiqueta span:first-child {
+  .video-portada img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 180ms ease;
+  }
+
+  .video-portada:hover img {
+    transform: scale(1.03);
+  }
+
+  .video-sin-miniatura {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #102b55, #1769aa);
+    color: #fff;
+  }
+
+  .video-sin-miniatura small {
+    color: #d8e9f7;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+
+  .boton-reproducir {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     display: grid;
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
     place-items: center;
+    padding-left: 3px;
+    transform: translate(-50%, -50%);
     border-radius: 50%;
     background: #1769aa;
     color: #fff;
+    font-size: 1.1rem;
+    box-shadow: 0 3px 12px rgb(0 0 0 / 25%);
+  }
+
+  .etiqueta-video {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 6px 9px;
+    border-radius: 6px;
+    background: rgb(8 26 59 / 88%);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
   }
 
   .categoria {

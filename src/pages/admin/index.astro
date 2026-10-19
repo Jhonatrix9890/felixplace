@@ -32,7 +32,7 @@ type CourseRow = {
   id: string;
   title: string;
   slug: string;
-  level: string;
+  level: string | null;
   access_model: 'free' | 'paid' | 'external';
   price: number | string | null;
   currency: string | null;
@@ -47,15 +47,21 @@ type PendingComment = {
   body: string;
 };
 
-const publishResult = Astro.getActionResult(actions.publishPost);
+const postPublishResult = Astro.getActionResult(actions.publishPost);
+const coursePublishResult = Astro.getActionResult(actions.publishCourse);
 const moderationResult = Astro.getActionResult(actions.moderateComment);
 
 const actionError =
-  publishResult?.error?.message ??
+  postPublishResult?.error?.message ??
+  coursePublishResult?.error?.message ??
   (esAdmin ? moderationResult?.error?.message : undefined);
 
-const publishMessage = publishResult?.data
+const postPublishMessage = postPublishResult?.data
   ? 'La publicación fue publicada correctamente.'
+  : '';
+
+const coursePublishMessage = coursePublishResult?.data
+  ? 'El curso fue publicado correctamente.'
   : '';
 
 const moderationMessage =
@@ -158,7 +164,19 @@ const precioCurso = (course: CourseRow) => {
   if (course.price === null) return 'Precio pendiente';
 
   const price = Number(course.price);
-  return `${course.currency ?? 'USD'} ${price.toFixed(2)}`;
+
+  if (!Number.isFinite(price)) {
+    return `${course.currency ?? 'USD'} ${course.price}`;
+  }
+
+  try {
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: course.currency?.trim() || 'USD',
+    }).format(price);
+  } catch {
+    return `${course.currency ?? 'USD'} ${price.toFixed(2)}`;
+  }
 };
 ---
 
@@ -193,7 +211,8 @@ const precioCurso = (course: CourseRow) => {
       </nav>
 
       {actionError && <p class="aviso error">{actionError}</p>}
-      {publishMessage && <p class="aviso">{publishMessage}</p>}
+      {postPublishMessage && <p class="aviso">{postPublishMessage}</p>}
+      {coursePublishMessage && <p class="aviso">{coursePublishMessage}</p>}
       {moderationMessage && <p class="aviso">{moderationMessage}</p>}
 
       {esAdmin && (
@@ -322,14 +341,28 @@ const precioCurso = (course: CourseRow) => {
                   <span class="tipo">{accesoCurso(course.access_model)}</span>
                   <h3>{course.title}</h3>
                   <p class="slug">/{course.slug}</p>
+
                   <p class="detalle-curso">
-                    Nivel: {course.level} · {precioCurso(course)}
+                    {course.level ? `Nivel: ${course.level} · ` : ''}
+                    {precioCurso(course)}
                   </p>
                 </div>
 
-                <span class="estado">
-                  {estadoPublicacion(course.status)}
-                </span>
+                <div class="acciones-publicacion">
+                  <span class="estado">
+                    {estadoPublicacion(course.status)}
+                  </span>
+
+                  {(course.status === 'draft' ||
+                    course.status === 'review') && (
+                    <form method="POST" action={actions.publishCourse}>
+                      <input type="hidden" name="id" value={course.id} />
+                      <button class="aprobar" type="submit">
+                        Publicar curso
+                      </button>
+                    </form>
+                  )}
+                </div>
               </article>
             ))}
           </div>

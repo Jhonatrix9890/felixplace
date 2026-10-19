@@ -50,11 +50,13 @@ type PendingComment = {
 const postPublishResult = Astro.getActionResult(actions.publishPost);
 const coursePublishResult = Astro.getActionResult(actions.publishCourse);
 const moderationResult = Astro.getActionResult(actions.moderateComment);
+const unpublishCourseResult = Astro.getActionResult(actions.unpublishCourse);
 
 const actionError =
   postPublishResult?.error?.message ??
   coursePublishResult?.error?.message ??
-  (esAdmin ? moderationResult?.error?.message : undefined);
+  (esAdmin ? moderationResult?.error?.message : undefined) ??
+  (esAdmin ? unpublishCourseResult?.error?.message : undefined);
 
 const postPublishMessage = postPublishResult?.data
   ? 'La publicación fue publicada correctamente.'
@@ -62,6 +64,10 @@ const postPublishMessage = postPublishResult?.data
 
 const coursePublishMessage = coursePublishResult?.data
   ? 'El curso fue publicado correctamente.'
+  : '';
+
+const unpublishCourseMessage = unpublishCourseResult?.data
+  ? 'El curso volvió a borrador y ya no aparece en el catálogo.'
   : '';
 
 const moderationMessage =
@@ -213,6 +219,9 @@ const precioCurso = (course: CourseRow) => {
       {actionError && <p class="aviso error">{actionError}</p>}
       {postPublishMessage && <p class="aviso">{postPublishMessage}</p>}
       {coursePublishMessage && <p class="aviso">{coursePublishMessage}</p>}
+      {unpublishCourseMessage && (
+        <p class="aviso">{unpublishCourseMessage}</p>
+      )}
       {moderationMessage && <p class="aviso">{moderationMessage}</p>}
 
       {esAdmin && (
@@ -299,8 +308,12 @@ const precioCurso = (course: CourseRow) => {
                 </div>
 
                 <div class="acciones-publicacion">
-                  <a class="editar" href={`/admin/editar/${post.id}`}>Editar</a>
-                  <span class="estado">{estadoPublicacion(post.status)}</span>
+                  <a class="editar" href={`/admin/editar/${post.id}`}>
+                    Editar
+                  </a>
+                  <span class="estado">
+                    {estadoPublicacion(post.status)}
+                  </span>
 
                   {(post.status === 'draft' || post.status === 'review') && (
                     <form method="POST" action={actions.publishPost}>
@@ -359,6 +372,15 @@ const precioCurso = (course: CourseRow) => {
                       <input type="hidden" name="id" value={course.id} />
                       <button class="aprobar" type="submit">
                         Publicar curso
+                      </button>
+                    </form>
+                  )}
+
+                  {esAdmin && course.status === 'published' && (
+                    <form method="POST" action={actions.unpublishCourse}>
+                      <input type="hidden" name="id" value={course.id} />
+                      <button class="rechazar" type="submit">
+                        Retirar del catálogo
                       </button>
                     </form>
                   )}
@@ -556,6 +578,7 @@ const precioCurso = (course: CourseRow) => {
   .botones-comentario {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -603,11 +626,6 @@ const precioCurso = (course: CourseRow) => {
     .comentario {
       align-items: flex-start;
       flex-direction: column;
-    }
-
-    .acciones-publicacion,
-    .botones-comentario {
-      flex-wrap: wrap;
     }
   }
 </style>

@@ -82,6 +82,54 @@ const tienePermisoEditorial = (roles: readonly string[] | undefined) =>
   roles?.some((role) => role === 'admin' || role === 'editor') ?? false;
 
 export const server = {
+
+  unpublishCourse: defineAction({
+    accept: 'form',
+    input: z.object({
+      id: z.string().uuid(),
+    }),
+
+    handler: async ({ id }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para administrar cursos.',
+        });
+      }
+
+      if (!user.roles?.includes('admin')) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Solo una cuenta administradora puede retirar cursos.',
+        });
+      }
+
+      const db = getDatabase();
+
+      const [course] = await db.sql<{ id: string; title: string }>`
+        UPDATE courses
+        SET
+          status = 'draft',
+          published_at = NULL,
+          updated_at = NOW()
+        WHERE id = ${id}
+          AND status = 'published'
+        RETURNING id, title
+      `;
+
+      if (!course) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró el curso publicado.',
+        });
+      }
+
+      return { id: course.id, title: course.title };
+    },
+  }),
+
   createPost: defineAction({
     accept: 'form',
 

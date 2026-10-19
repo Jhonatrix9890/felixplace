@@ -11,16 +11,11 @@ const fechaActualizacion = new Intl.DateTimeFormat('es-EC', {
   description="Información sobre los datos que FelixPlace recoge y cómo se utilizan."
 >
   <main class="pagina">
-    <header class="encabezado">
+    <header class="intro-privacidad">
       <p class="etiqueta">INFORMACIÓN Y PRIVACIDAD</p>
       <h1>Política de privacidad</h1>
       <p>Última actualización: {fechaActualizacion}</p>
     </header>
-
-    <p class="pendiente">
-      <strong>Pendiente antes de publicar:</strong> completa la identidad del
-      responsable del sitio y sus datos públicos de contacto.
-    </p>
 
     <section class="bloque">
       <h2>1. Responsable del tratamiento</h2>
@@ -28,9 +23,14 @@ const fechaActualizacion = new Intl.DateTimeFormat('es-EC', {
         El responsable del tratamiento de los datos personales de este sitio es:
       </p>
       <ul>
-        <li><strong>Responsable:</strong> Ing. Silva Moran Jonathan Javier</li>
+        <li>
+          <strong>Responsable:</strong> Ing. Jonathan Javier Silva Morán
+        </li>
         <li><strong>Correo de contacto:</strong> felixplace13@gmail.com</li>
-        <li><strong>Dirección para notificaciones:</strong> La Gazca-Quito-Ecuador</li>
+        <li>
+          <strong>Dirección para notificaciones:</strong>
+          La Gazca, Quito, Ecuador
+        </li>
       </ul>
     </section>
 
@@ -144,7 +144,7 @@ const fechaActualizacion = new Intl.DateTimeFormat('es-EC', {
     padding: 48px 0 16px;
   }
 
-  .encabezado {
+  .intro-privacidad {
     margin-bottom: 28px;
   }
 
@@ -156,24 +156,15 @@ const fechaActualizacion = new Intl.DateTimeFormat('es-EC', {
     letter-spacing: 0.08em;
   }
 
-  h1 {
+  .intro-privacidad h1 {
     margin: 0 0 10px;
     color: #172033;
     font-size: clamp(2.2rem, 6vw, 3.5rem);
     line-height: 1.1;
   }
 
-  .encabezado > p:last-child {
+  .intro-privacidad > p:last-child {
     color: #647084;
-  }
-
-  .pendiente {
-    padding: 16px;
-    border: 1px solid #f0cf7a;
-    border-radius: 10px;
-    background: #fff8e6;
-    color: #674c12;
-    line-height: 1.6;
   }
 
   .bloque {

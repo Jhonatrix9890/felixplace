@@ -14,10 +14,10 @@ const errorMessage = result?.error?.message;
   description="Escribe a FelixPlace para consultas, sugerencias o reportes de errores."
 >
   <main class="pagina">
-    <header class="encabezado">
+    <header class="intro-contacto">
       <p class="etiqueta">HABLEMOS</p>
       <h1>Contacto y sugerencias</h1>
-      <p>
+      <p class="descripcion-intro">
         ¿Tienes una consulta, una idea para un tutorial o encontraste un error?
         Cuéntanos mediante este formulario.
       </p>
@@ -126,7 +126,7 @@ const errorMessage = result?.error?.message;
     padding: 48px 0 16px;
   }
 
-  .encabezado {
+  .intro-contacto {
     margin-bottom: 28px;
   }
 
@@ -138,14 +138,14 @@ const errorMessage = result?.error?.message;
     letter-spacing: 0.08em;
   }
 
-  h1 {
+  .intro-contacto h1 {
     margin: 0 0 12px;
     color: #172033;
     font-size: clamp(2.2rem, 6vw, 3.5rem);
     line-height: 1.1;
   }
 
-  .encabezado > p:last-child,
+  .descripcion-intro,
   .nota {
     color: #596579;
     line-height: 1.7;
@@ -180,6 +180,13 @@ const errorMessage = result?.error?.message;
     font: inherit;
   }
 
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #1769aa;
+    outline: 3px solid rgb(23 105 170 / 15%);
+  }
+
   textarea {
     resize: vertical;
   }
@@ -195,6 +202,7 @@ const errorMessage = result?.error?.message;
 
   .consentimiento input {
     width: auto;
+    flex: 0 0 auto;
     margin-top: 4px;
   }
 
@@ -218,6 +226,11 @@ const errorMessage = result?.error?.message;
 
   button:hover {
     background: #12578f;
+  }
+
+  button:focus-visible {
+    outline: 3px solid #16c8ee;
+    outline-offset: 3px;
   }
 
   .aviso {
@@ -254,6 +267,10 @@ const errorMessage = result?.error?.message;
     .pagina {
       width: min(100% - 32px, 760px);
       padding-top: 32px;
+    }
+
+    button {
+      width: 100%;
     }
   }
 </style>

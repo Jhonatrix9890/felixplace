@@ -362,6 +362,13 @@ const precioCurso = (course: CourseRow) => {
                 </div>
 
                 <div class="acciones-publicacion">
+                  <a
+                    class="editar"
+                    href={`/admin/cursos/editar/${course.id}`}
+                  >
+                    Editar
+                  </a>
+
                   <span class="estado">
                     {estadoPublicacion(course.status)}
                   </span>

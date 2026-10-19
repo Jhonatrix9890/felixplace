@@ -641,6 +641,144 @@ export const server = {
     },
   }),
 
+    updateCourse: defineAction({
+    accept: 'form',
+
+    input: z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().trim().min(5).max(180),
+        slug: z
+          .string()
+          .trim()
+          .max(180)
+          .regex(slugValido, 'Escribe un slug válido.'),
+        summary: z.string().trim().min(10).max(350),
+        description_markdown: textoOpcional(50000),
+        cover_image_url: urlOpcional,
+        level: textoOpcional(40),
+        language: z.string().trim().min(2).max(10),
+        access_model: z.enum(['free', 'paid', 'external']),
+        price: z.preprocess(
+          valorVacioComoNulo,
+          z.coerce.number().min(0).max(100000).nullish(),
+        ),
+        currency: z
+          .string()
+          .trim()
+          .length(3)
+          .transform((currency) => currency.toUpperCase()),
+        checkout_url: urlOpcional,
+        seo_title: textoOpcional(180),
+        seo_description: textoOpcional(200),
+      })
+      .superRefine((input, ctx) => {
+        if (input.access_model === 'paid' && input.price == null) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['price'],
+            message: 'Indica el precio del curso.',
+          });
+        }
+
+        if (input.access_model === 'external' && !input.checkout_url) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['checkout_url'],
+            message: 'Agrega el enlace externo donde se ofrece el curso.',
+          });
+        }
+      }),
+
+    handler: async ({ id, ...input }) => {
+      const user = await getUser();
+
+      if (!user) {
+        throw new ActionError({
+          code: 'UNAUTHORIZED',
+          message: 'Inicia sesión para editar un curso.',
+        });
+      }
+
+      if (!tienePermisoEditorial(user.roles)) {
+        throw new ActionError({
+          code: 'FORBIDDEN',
+          message: 'Tu cuenta no tiene permiso para editar cursos.',
+        });
+      }
+
+      const db = getDatabase();
+
+      const [existingCourse] = await db.sql<{
+        id: string;
+        slug: string;
+        status: string;
+      }>`
+        SELECT id, slug, status
+        FROM courses
+        WHERE id = ${id}
+        LIMIT 1
+      `;
+
+      if (!existingCourse) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se encontró el curso que deseas editar.',
+        });
+      }
+
+      if (
+        existingCourse.status === 'published' &&
+        existingCourse.slug !== input.slug
+      ) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'No se puede cambiar el slug de un curso publicado.',
+        });
+      }
+
+      const duplicate = await db.sql`
+        SELECT id
+        FROM courses
+        WHERE slug = ${input.slug}
+          AND id <> ${id}
+        LIMIT 1
+      `;
+
+      if (duplicate.length > 0) {
+        throw new ActionError({
+          code: 'BAD_REQUEST',
+          message: 'Ya existe otro curso con ese slug.',
+        });
+      }
+
+      const [course] = await db.sql<{ id: string; slug: string }>`
+        UPDATE courses
+        SET
+          title = ${input.title},
+          slug = ${input.slug},
+          summary = ${input.summary},
+          description_markdown = ${input.description_markdown ?? ''},
+          cover_image_url = ${input.cover_image_url ?? null},
+          level = ${input.level ?? null},
+          language = ${input.language},
+          access_model = ${input.access_model},
+          price = ${
+            input.access_model === 'free' ? null : (input.price ?? null)
+          },
+          currency = ${input.currency},
+          checkout_url = ${input.checkout_url ?? null},
+          seo_title = ${input.seo_title ?? null},
+          seo_description = ${input.seo_description ?? null},
+          updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING id, slug
+      `;
+
+      return { id: course.id, slug: course.slug };
+    },
+  }),
+
   publishCourse: defineAction({
     accept: 'form',
 

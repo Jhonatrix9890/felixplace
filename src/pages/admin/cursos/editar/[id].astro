@@ -1,0 +1,379 @@
+---
+import { getUser } from '@netlify/identity';
+import { getDatabase } from '@netlify/database';
+import { actions } from 'astro:actions';
+
+export const prerender = false;
+
+const user = await getUser();
+
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+const tienePermiso =
+  user.roles?.includes('admin') || user.roles?.includes('editor');
+
+if (!tienePermiso) {
+  return new Response('Tu cuenta no tiene permiso para editar cursos.', {
+    status: 403,
+  });
+}
+
+const actionResult = Astro.getActionResult(actions.updateCourse);
+
+if (actionResult && !actionResult.error && actionResult.data) {
+  return Astro.redirect(
+    `/admin/cursos/editar/${actionResult.data.id}?guardado=1`,
+  );
+}
+
+type CourseRow = {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  description_markdown: string | null;
+  cover_image_url: string | null;
+  level: string | null;
+  language: string;
+  access_model: 'free' | 'paid' | 'external';
+  price: number | string | null;
+  currency: string;
+  checkout_url: string | null;
+  status: string;
+  seo_title: string | null;
+  seo_description: string | null;
+};
+
+const id = Astro.params.id ?? '';
+const db = getDatabase();
+
+const [course] = await db.sql<CourseRow>`
+  SELECT
+    id,
+    title,
+    slug,
+    summary,
+    description_markdown,
+    cover_image_url,
+    level,
+    language,
+    access_model,
+    price,
+    currency,
+    checkout_url,
+    status,
+    seo_title,
+    seo_description
+  FROM courses
+  WHERE id = ${id}
+  LIMIT 1
+`;
+
+if (!course) {
+  Astro.response.status = 404;
+}
+
+const errorMessage = actionResult?.error?.message;
+const guardado = Astro.url.searchParams.get('guardado') === '1';
+const estaPublicado = course?.status === 'published';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Editar curso | FelixPlace</title>
+  </head>
+
+  <body>
+    <main class="panel">
+      <a class="volver" href="/admin">← Volver al panel</a>
+
+      {course ? (
+        <>
+          <p class="marca">FELIXPLACE</p>
+          <h1>Editar curso</h1>
+          <p class="ayuda">
+            Estado: <strong>{course.status}</strong>
+          </p>
+
+          {guardado && (
+            <p class="mensaje exito">Cambios guardados correctamente.</p>
+          )}
+
+          {errorMessage && <p class="mensaje error">{errorMessage}</p>}
+
+          <form method="POST" action={actions.updateCourse}>
+            <input type="hidden" name="id" value={course.id} />
+
+            <label for="title">Título del curso</label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              minlength="5"
+              maxlength="180"
+              value={course.title}
+              required
+            />
+
+            <label for="slug">Slug de la URL</label>
+            <input
+              id="slug"
+              name="slug"
+              type="text"
+              maxlength="180"
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              value={course.slug}
+              readonly={estaPublicado}
+              required
+            />
+            <small>
+              {estaPublicado
+                ? 'No se puede cambiar la URL de un curso publicado.'
+                : 'Usa letras minúsculas, números y guiones.'}
+            </small>
+
+            <label for="summary">Resumen</label>
+            <textarea
+              id="summary"
+              name="summary"
+              rows="3"
+              minlength="10"
+              maxlength="350"
+              required
+            >{course.summary}</textarea>
+
+            <label for="description_markdown">Descripción completa</label>
+            <textarea
+              id="description_markdown"
+              name="description_markdown"
+              rows="10"
+              maxlength="50000"
+              placeholder="Puedes usar Markdown para organizar el contenido."
+            >{course.description_markdown ?? ''}</textarea>
+
+            <label for="cover_image_url">URL de la portada</label>
+            <input
+              id="cover_image_url"
+              name="cover_image_url"
+              type="url"
+              maxlength="2048"
+              value={course.cover_image_url ?? ''}
+              placeholder="https://..."
+            />
+
+            <label for="level">Nivel</label>
+            <input
+              id="level"
+              name="level"
+              type="text"
+              maxlength="40"
+              value={course.level ?? ''}
+            />
+
+            <label for="language">Idioma</label>
+            <input
+              id="language"
+              name="language"
+              type="text"
+              minlength="2"
+              maxlength="10"
+              value={course.language}
+              required
+            />
+
+            <label for="access_model">Modelo de acceso</label>
+            <select id="access_model" name="access_model" required>
+              <option
+                value="free"
+                selected={course.access_model === 'free'}
+              >
+                Gratuito
+              </option>
+              <option
+                value="paid"
+                selected={course.access_model === 'paid'}
+              >
+                De pago
+              </option>
+              <option
+                value="external"
+                selected={course.access_model === 'external'}
+              >
+                Enlace externo
+              </option>
+            </select>
+
+            <label for="price">Precio</label>
+            <input
+              id="price"
+              name="price"
+              type="number"
+              min="0"
+              max="100000"
+              step="0.01"
+              value={course.price ?? ''}
+            />
+            <small>Se requiere para los cursos de pago.</small>
+
+            <label for="currency">Moneda</label>
+            <input
+              id="currency"
+              name="currency"
+              type="text"
+              minlength="3"
+              maxlength="3"
+              value={course.currency}
+              required
+            />
+
+            <label for="checkout_url">Enlace de acceso o compra</label>
+            <input
+              id="checkout_url"
+              name="checkout_url"
+              type="url"
+              maxlength="2048"
+              value={course.checkout_url ?? ''}
+              placeholder="https://..."
+            />
+            <small>Se requiere para los cursos con enlace externo.</small>
+
+            <label for="seo_title">Título SEO</label>
+            <input
+              id="seo_title"
+              name="seo_title"
+              type="text"
+              maxlength="180"
+              value={course.seo_title ?? ''}
+            />
+
+            <label for="seo_description">Descripción SEO</label>
+            <textarea
+              id="seo_description"
+              name="seo_description"
+              rows="3"
+              maxlength="200"
+            >{course.seo_description ?? ''}</textarea>
+
+            <button type="submit">Guardar cambios</button>
+          </form>
+        </>
+      ) : (
+        <>
+          <h1>Curso no encontrado</h1>
+          <p>No encontramos el curso que quieres editar.</p>
+        </>
+      )}
+    </main>
+  </body>
+</html>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #f3f5f8;
+    color: #172033;
+    font-family: Arial, sans-serif;
+  }
+
+  .panel {
+    width: min(100%, 760px);
+    margin: 0 auto;
+    padding: 32px;
+    border: 1px solid #e4e8ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 45px rgb(20 35 60 / 8%);
+  }
+
+  .volver {
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .marca {
+    margin-top: 28px;
+    color: #1769aa;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  h1 {
+    margin-bottom: 8px;
+  }
+
+  .ayuda,
+  small {
+    color: #596579;
+  }
+
+  form {
+    display: grid;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  label {
+    margin-top: 10px;
+    font-weight: 700;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd3df;
+    border-radius: 8px;
+    color: inherit;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  button {
+    margin-top: 18px;
+    padding: 14px 18px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mensaje {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .exito {
+    background: #e9f8ef;
+    color: #176236;
+  }
+
+  .error {
+    background: #fff0f0;
+    color: #9b2020;
+  }
+
+  @media (max-width: 600px) {
+    .panel {
+      padding: 22px;
+    }
+  }
+</style>

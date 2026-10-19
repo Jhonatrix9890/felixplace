@@ -12,13 +12,44 @@ Astro.response.headers.set(
 const db = getDatabase();
 
 const tutorials = await db.sql`
-  SELECT slug, title, category, description
+  SELECT slug, title, category, description, video_url
   FROM posts
   WHERE kind = 'tutorial'
     AND status = 'published'
   ORDER BY published_at DESC NULLS LAST, created_at DESC
   LIMIT 12
 `;
+
+function obtenerIdYouTube(videoUrl: string | null | undefined) {
+  if (!videoUrl) return null;
+
+  try {
+    const url = new URL(videoUrl);
+    const host = url.hostname.toLowerCase();
+    let videoId = '';
+
+    if (host === 'youtu.be') {
+      videoId = url.pathname.split('/').filter(Boolean)[0] ?? '';
+    } else if (
+      host === 'youtube.com' ||
+      host === 'www.youtube.com' ||
+      host === 'm.youtube.com'
+    ) {
+      if (url.pathname === '/watch') {
+        videoId = url.searchParams.get('v') ?? '';
+      } else if (
+        url.pathname.startsWith('/shorts/') ||
+        url.pathname.startsWith('/embed/')
+      ) {
+        videoId = url.pathname.split('/').filter(Boolean)[1] ?? '';
+      }
+    }
+
+    return /^[a-zA-Z0-9_-]{11}$/.test(videoId) ? videoId : null;
+  } catch {
+    return null;
+  }
+}
 ---
 
 <BaseLayout
@@ -26,11 +57,12 @@ const tutorials = await db.sql`
   description="Guías y tutoriales en video para aprender tecnología paso a paso."
 >
   <main class="pagina">
-    <header class="encabezado">
-      <p class="etiqueta">APRENDE PASO A PASO</p>
-      <h1>Tutoriales</h1>
-      <p>
-        Videos y guías prácticas para aprovechar mejor la tecnología.
+    <header class="hero-tutoriales">
+      <p class="etiqueta">FELIXPLACE · APRENDE</p>
+      <h1>Tutoriales de tecnología</h1>
+      <p class="introduccion">
+        Aprende paso a paso con videos y guías prácticas para aprovechar mejor
+        la tecnología.
       </p>
     </header>
 
@@ -38,136 +70,121 @@ const tutorials = await db.sql`
       <p class="vacio">Pronto publicaremos nuestros primeros tutoriales.</p>
     ) : (
       <section class="grid" aria-label="Tutoriales publicados">
-        {tutorials.map((tutorial) => (
-          <article class="tarjeta">
-            <p class="tipo">▶ Tutorial en video</p>
+        {tutorials.map((tutorial) => {
+          const videoId = obtenerIdYouTube(tutorial.video_url);
+          const miniatura = videoId
+            ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+            : null;
+          const ruta = `/tutoriales/${tutorial.slug}`;
 
-            <p class="categoria">{tutorial.category || 'Tecnología'}</p>
+          return (
+            <article class="tarjeta">
+              <a
+                class="miniatura"
+                href={ruta}
+                aria-label={`Ver tutorial: ${tutorial.title}`}
+              >
+                {miniatura ? (
+                  <img
+                    src={miniatura}
+                    alt={`Miniatura del video: ${tutorial.title}`}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <span class="miniatura-vacia">FelixPlace · Tutorial en video</span>
+                )}
 
-            <h2>
-              <a href={`/tutoriales/${tutorial.slug}`}>{tutorial.title}</a>
-            </h2>
+                <span class="boton-reproducir" aria-hidden="true">▶</span>
+              </a>
 
-            {tutorial.description && <p class="descripcion">{tutorial.description}</p>}
+              <div class="contenido-tarjeta">
+                <p class="categoria">
+                  {tutorial.category || 'Tecnología'}
+                </p>
 
-            <a class="enlace" href={`/tutoriales/${tutorial.slug}`}>
-              Ver tutorial <span aria-hidden="true">→</span>
-            </a>
-          </article>
-        ))}
+                <h2>
+                  <a href={ruta}>{tutorial.title}</a>
+                </h2>
+
+                {tutorial.description && (
+                  <p class="descripcion">{tutorial.description}</p>
+                )}
+
+                <a class="enlace" href={ruta}>
+                  Ver tutorial <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
       </section>
     )}
   </main>
 </BaseLayout>
 
 <style>
+.pagina {
+  width: min(100% - 40px, 1100px);
+  margin: 0 auto;
+  padding: 48px 0 72px;
+}
+
+.hero-tutoriales {
+  max-width: 820px;
+  margin-bottom: 32px;
+}
+
+.hero-tutoriales h1 {
+  margin: 8px 0;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+}
+
+.hero-tutoriales > p:last-child {
+  color: #596579;
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.tarjeta,
+.vacio {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgb(23 32 51 / 5%);
+}
+
+.tarjeta {
+  display: flex;
+  min-height: 320px;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.vacio {
+  max-width: 440px;
+  padding: 24px;
+  color: #647084;
+  line-height: 1.6;
+}
+
+@media (max-width: 600px) {
   .pagina {
-    width: min(100% - 40px, 1100px);
-    margin: 0 auto;
-    padding: 48px 0 72px;
+    width: min(100% - 32px, 1100px);
+    padding-top: 32px;
   }
-
-  .encabezado {
-    max-width: 720px;
-    margin-bottom: 32px;
-  }
-
-  .etiqueta,
-  .categoria {
-    color: #1769aa;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  h1 {
-    margin: 8px 0;
-    color: #172033;
-    font-size: clamp(2.2rem, 6vw, 3.5rem);
-    line-height: 1.1;
-  }
-
-  .encabezado > p:last-child,
-  .descripcion,
-  .vacio {
-    color: #596579;
-    line-height: 1.7;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 20px;
-  }
-
-  .tarjeta {
-    display: flex;
-    min-height: 230px;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 24px;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 5px 20px rgb(23 32 51 / 5%);
-  }
-
-  .tipo {
-    margin: 0 0 22px;
-    padding: 7px 10px;
-    border-radius: 999px;
-    background: #edf4fb;
-    color: #1769aa;
-    font-size: 0.85rem;
-    font-weight: 700;
-  }
-
-  .categoria {
-    margin: 0 0 8px;
-    font-size: 0.75rem;
-  }
-
-  .tarjeta h2 {
-    margin: 0 0 10px;
-    font-size: 1.3rem;
-    line-height: 1.35;
-  }
-
-  .tarjeta h2 a {
-    color: #172033;
-    text-decoration: none;
-  }
-
-  .tarjeta h2 a:hover {
-    color: #1769aa;
-  }
-
-  .descripcion {
-    margin: 0 0 20px;
-  }
-
-  .enlace {
-    margin-top: auto;
-    color: #1769aa;
-    font-weight: 700;
-    text-decoration: none;
-  }
-
-  .enlace:hover {
-    text-decoration: underline;
-  }
-
-  .vacio {
-    padding: 24px;
-    border-radius: 12px;
-    background: #fff;
-  }
-
-  @media (max-width: 600px) {
-    .pagina {
-      width: min(100% - 32px, 1100px);
-      padding-top: 32px;
-    }
-  }
+}
+.etiqueta {
+  color: #1769aa;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 </style>

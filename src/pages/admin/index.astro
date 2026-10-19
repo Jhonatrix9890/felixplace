@@ -28,6 +28,17 @@ type PostRow = {
   status: string;
 };
 
+type CourseRow = {
+  id: string;
+  title: string;
+  slug: string;
+  level: string;
+  access_model: 'free' | 'paid' | 'external';
+  price: number | string | null;
+  currency: string | null;
+  status: string;
+};
+
 type PendingComment = {
   id: string;
   post_id: string;
@@ -55,8 +66,10 @@ const moderationMessage =
     : '';
 
 let posts: PostRow[] = [];
+let courses: CourseRow[] = [];
 let pendingComments: PendingComment[] = [];
 let errorMessage = '';
+let courseError = '';
 
 try {
   const db = getDatabase();
@@ -90,6 +103,30 @@ try {
       : 'No se pudieron cargar los datos del panel.';
 }
 
+try {
+  const db = getDatabase();
+
+  courses = (await db.sql`
+    SELECT
+      id,
+      title,
+      slug,
+      level,
+      access_model,
+      price,
+      currency,
+      status
+    FROM courses
+    ORDER BY updated_at DESC
+    LIMIT 50
+  `) as unknown as CourseRow[];
+} catch (error) {
+  courseError =
+    error instanceof Error
+      ? error.message
+      : 'No se pudieron cargar los cursos.';
+}
+
 const tipoPublicacion = (kind: PostRow['kind']) =>
   kind === 'news' ? 'Noticia' : 'Tutorial';
 
@@ -103,6 +140,25 @@ const estadoPublicacion = (status: string) => {
   };
 
   return estados[status] ?? status;
+};
+
+const accesoCurso = (accessModel: CourseRow['access_model']) => {
+  const accesos: Record<CourseRow['access_model'], string> = {
+    free: 'Gratuito',
+    paid: 'De pago',
+    external: 'Enlace externo',
+  };
+
+  return accesos[accessModel] ?? accessModel;
+};
+
+const precioCurso = (course: CourseRow) => {
+  if (course.access_model === 'free') return 'Gratis';
+  if (course.access_model === 'external') return 'Acceso externo';
+  if (course.price === null) return 'Precio pendiente';
+
+  const price = Number(course.price);
+  return `${course.currency ?? 'USD'} ${price.toFixed(2)}`;
 };
 ---
 
@@ -239,6 +295,46 @@ const estadoPublicacion = (status: string) => {
           </div>
         )}
       </section>
+
+      <section class="seccion cursos">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Cursos</h2>
+            <p>Cursos guardados en la base de datos.</p>
+          </div>
+
+          <a class="accion" href="/admin/cursos/nuevo">Crear curso</a>
+        </div>
+
+        {courseError ? (
+          <p class="aviso error">
+            No se pudieron cargar los cursos: {courseError}
+          </p>
+        ) : courses.length === 0 ? (
+          <p class="aviso">
+            Todavía no hay cursos. Puedes crear el primero como borrador.
+          </p>
+        ) : (
+          <div class="lista">
+            {courses.map((course) => (
+              <article class="publicacion">
+                <div>
+                  <span class="tipo">{accesoCurso(course.access_model)}</span>
+                  <h3>{course.title}</h3>
+                  <p class="slug">/{course.slug}</p>
+                  <p class="detalle-curso">
+                    Nivel: {course.level} · {precioCurso(course)}
+                  </p>
+                </div>
+
+                <span class="estado">
+                  {estadoPublicacion(course.status)}
+                </span>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </main>
 
     <script>
@@ -263,25 +359,6 @@ const estadoPublicacion = (status: string) => {
     color: #172033;
     font-family: Arial, sans-serif;
   }
-
-.atajos-admin {
-  padding: 20px 0 4px;
-}
-
-.atajos-admin a {
-  display: inline-block;
-  padding: 11px 15px;
-  border-radius: 8px;
-  background: #e8f0f8;
-  color: #1769aa;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.atajos-admin a:hover {
-  background: #dceaf6;
-}
-
 
   .panel {
     width: min(100%, 960px);
@@ -326,10 +403,29 @@ const estadoPublicacion = (status: string) => {
     margin-bottom: 8px;
   }
 
+  .atajos-admin {
+    padding: 20px 0 4px;
+  }
+
+  .atajos-admin a {
+    display: inline-block;
+    padding: 11px 15px;
+    border-radius: 8px;
+    background: #e8f0f8;
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .atajos-admin a:hover {
+    background: #dceaf6;
+  }
+
   .sesion,
   .titulo-seccion p,
   .slug,
-  .sobre {
+  .sobre,
+  .detalle-curso {
     color: #647084;
   }
 
@@ -414,8 +510,13 @@ const estadoPublicacion = (status: string) => {
   }
 
   .slug {
-    margin-bottom: 0;
+    margin-bottom: 6px;
     overflow-wrap: anywhere;
+  }
+
+  .detalle-curso {
+    margin-bottom: 0;
+    font-size: 0.9rem;
   }
 
   .acciones-publicacion,

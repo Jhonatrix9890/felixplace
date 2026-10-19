@@ -1,0 +1,7 @@
+# Local Netlify folder
+.netlify
+node_modules
+node_modules
+.astro/
+dist/
+/src/pages/prueba-db.astro

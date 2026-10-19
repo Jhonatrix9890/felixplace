@@ -1,0 +1,394 @@
+---
+export const prerender = false;
+
+import { getDatabase } from '@netlify/database';
+import { actions } from 'astro:actions';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+
+const slug = Astro.params.slug ?? '';
+const db = getDatabase();
+const commentResult = Astro.getActionResult(actions.submitComment);
+
+const [post] = await db.sql`
+  SELECT
+    id,
+    title,
+    slug,
+    category,
+    image_url,
+    image_alt,
+    description,
+    body_markdown,
+    author_name,
+    published_at,
+    seo_title,
+    seo_description
+  FROM posts
+  WHERE slug = ${slug}
+    AND kind = 'news'
+    AND status = 'published'
+  LIMIT 1
+`;
+
+if (!post) {
+  Astro.response.status = 404;
+}
+
+type CommentRow = {
+  display_name: string;
+  body: string;
+  created_at: string | Date;
+};
+
+let comments: CommentRow[] = [];
+
+if (post) {
+  comments = (await db.sql`
+    SELECT display_name, body, created_at
+    FROM comments
+    WHERE post_id = ${post.id}
+      AND status = 'approved'
+    ORDER BY created_at DESC
+    LIMIT 50
+  `) as unknown as CommentRow[];
+}
+
+const pageTitle = post?.seo_title || post?.title || 'Noticia no encontrada';
+const pageDescription =
+  post?.seo_description ||
+  post?.description ||
+  'Noticias de tecnología en FelixPlace.';
+
+const articleHtml = post
+  ? sanitizeHtml(await marked.parse(post.body_markdown || ''))
+  : '';
+
+const siteUrl = Astro.site ?? new URL('https://felixplace.com');
+
+const canonicalUrl = post
+  ? new URL(`/noticias/${post.slug}`, siteUrl).toString()
+  : '';
+
+const publishedTime = post?.published_at
+  ? new Date(post.published_at).toISOString()
+  : '';
+
+const fechaComentario = (date: string | Date) =>
+  new Date(date).toLocaleDateString('es-EC', { dateStyle: 'medium' });
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{pageTitle} | FelixPlace</title>
+    <meta name="description" content={pageDescription} />
+    <meta
+      name="robots"
+      content={post ? 'index, follow' : 'noindex, nofollow'}
+    />
+
+    {post && <link rel="canonical" href={canonicalUrl} />}
+
+    {post && (
+      <>
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="FelixPlace" />
+        <meta property="og:locale" content="es_EC" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${pageTitle} | FelixPlace`} />
+        <meta property="og:description" content={pageDescription} />
+
+        {post.image_url && (
+          <>
+            <meta property="og:image" content={post.image_url} />
+            <meta
+              property="og:image:alt"
+              content={post.image_alt || post.title}
+            />
+          </>
+        )}
+
+        {publishedTime && (
+          <meta property="article:published_time" content={publishedTime} />
+        )}
+
+        <meta
+          name="twitter:card"
+          content={post.image_url ? 'summary_large_image' : 'summary'}
+        />
+        <meta name="twitter:title" content={`${pageTitle} | FelixPlace`} />
+        <meta name="twitter:description" content={pageDescription} />
+
+        {post.image_url && (
+          <meta name="twitter:image" content={post.image_url} />
+        )}
+      </>
+    )}
+  </head>
+
+  <body>
+    <main>
+      {post ? (
+        <>
+          <article class="articulo">
+            <a class="volver" href="/noticias">← Volver a noticias</a>
+            <p class="categoria">{post.category || 'Tecnología'}</p>
+            <h1>{post.title}</h1>
+
+            {post.description && <p class="descripcion">{post.description}</p>}
+
+            <p class="autor">Por {post.author_name}</p>
+
+            {post.image_url && (
+              <img
+                class="imagen-portada"
+                src={post.image_url}
+                alt={post.image_alt || post.title}
+                fetchpriority="high"
+              />
+            )}
+
+            <div class="contenido" set:html={articleHtml}></div>
+          </article>
+
+          <section class="comentarios" aria-labelledby="titulo-comentarios">
+            <h2 id="titulo-comentarios">Comentarios</h2>
+            <p class="ayuda">
+              Tu comentario será revisado antes de aparecer públicamente.
+            </p>
+
+            {commentResult && !commentResult.error && (
+              <p class="mensaje exito" aria-live="polite">
+                {commentResult.data.message}
+              </p>
+            )}
+
+            {commentResult?.error && (
+              <p class="mensaje error" aria-live="polite">
+                No se pudo enviar el comentario. Revisa los datos e inténtalo de nuevo.
+              </p>
+            )}
+
+            {comments.length === 0 ? (
+              <p>Aún no hay comentarios aprobados.</p>
+            ) : (
+              <div class="lista-comentarios">
+                {comments.map((comment) => (
+                  <article class="comentario">
+                    <h3>{comment.display_name}</h3>
+                    <p>{comment.body}</p>
+                    <small>{fechaComentario(comment.created_at)}</small>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            <form method="POST" action={actions.submitComment}>
+              <input type="hidden" name="post_id" value={post.id} />
+
+              <label for="display_name">Tu nombre</label>
+              <input
+                id="display_name"
+                name="display_name"
+                type="text"
+                minlength="2"
+                maxlength="80"
+                required
+              />
+
+              <label for="body">Comentario</label>
+              <textarea
+                id="body"
+                name="body"
+                minlength="2"
+                maxlength="2000"
+                rows="5"
+                required
+              ></textarea>
+
+              <div class="campo-oculto" aria-hidden="true">
+                <label for="website">Deja este campo vacío</label>
+                <input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabindex="-1"
+                  autocomplete="off"
+                />
+              </div>
+
+              <button type="submit">Enviar comentario</button>
+            </form>
+          </section>
+        </>
+      ) : (
+        <section class="articulo">
+          <h1>Noticia no encontrada</h1>
+          <p>Esta noticia no existe o todavía no está publicada.</p>
+          <a class="volver" href="/noticias">Volver a noticias</a>
+        </section>
+      )}
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    color: #172033;
+    font-family: system-ui, sans-serif;
+    background: #f4f6fa;
+  }
+
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  .articulo,
+  .comentarios {
+    margin-bottom: 24px;
+    padding: clamp(1.25rem, 5vw, 2.5rem);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 18px #17203312;
+  }
+
+  .volver {
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .categoria {
+    margin: 1.5rem 0 0.5rem;
+    color: #1769aa;
+    font-weight: 700;
+  }
+
+  h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1.15;
+  }
+
+  .descripcion {
+    color: #465166;
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+
+  .autor,
+  .ayuda,
+  .comentario small {
+    color: #647084;
+  }
+
+  .imagen-portada {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    margin: 1.5rem 0;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+  .contenido {
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .contenido :global(h2),
+  .contenido :global(h3) {
+    margin-top: 2rem;
+    line-height: 1.3;
+  }
+
+  .contenido :global(img) {
+    height: auto;
+  }
+
+  .contenido :global(a) {
+    color: #1769aa;
+  }
+
+  .lista-comentarios {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .comentario {
+    padding: 16px;
+    border: 1px solid #e4e8ef;
+    border-radius: 8px;
+  }
+
+  .comentario h3 {
+    margin: 0 0 8px;
+  }
+
+  .comentario p {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  form {
+    display: grid;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #cbd3df;
+    border-radius: 7px;
+    font: inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  button {
+    justify-self: start;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .mensaje {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .exito {
+    background: #eaf7ee;
+    color: #176b35;
+  }
+
+  .error {
+    background: #fff1f0;
+    color: #9b2525;
+  }
+
+  .campo-oculto {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>

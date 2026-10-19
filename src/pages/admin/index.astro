@@ -1,0 +1,456 @@
+---
+import { getUser } from '@netlify/identity';
+import { getDatabase } from '@netlify/database';
+import { actions } from 'astro:actions';
+
+export const prerender = false;
+
+const user = await getUser();
+
+if (!user) {
+  return Astro.redirect('/admin/login');
+}
+
+const esAdmin = user.roles?.includes('admin') ?? false;
+const esEditor = user.roles?.includes('editor') ?? false;
+
+if (!esAdmin && !esEditor) {
+  return new Response('Tu cuenta no tiene permiso para entrar al panel.', {
+    status: 403,
+  });
+}
+
+type PostRow = {
+  id: string;
+  kind: 'news' | 'tutorial';
+  title: string;
+  slug: string;
+  status: string;
+};
+
+type PendingComment = {
+  id: string;
+  post_id: string;
+  post_title: string;
+  display_name: string;
+  body: string;
+};
+
+const publishResult = Astro.getActionResult(actions.publishPost);
+const moderationResult = Astro.getActionResult(actions.moderateComment);
+
+const actionError =
+  publishResult?.error?.message ??
+  (esAdmin ? moderationResult?.error?.message : undefined);
+
+const publishMessage = publishResult?.data
+  ? 'La publicación fue publicada correctamente.'
+  : '';
+
+const moderationMessage =
+  esAdmin && moderationResult?.data
+    ? moderationResult.data.status === 'approved'
+      ? 'El comentario fue aprobado.'
+      : 'El comentario fue rechazado.'
+    : '';
+
+let posts: PostRow[] = [];
+let pendingComments: PendingComment[] = [];
+let errorMessage = '';
+
+try {
+  const db = getDatabase();
+
+  posts = (await db.sql`
+    SELECT id, kind, title, slug, status
+    FROM posts
+    ORDER BY updated_at DESC
+    LIMIT 50
+  `) as unknown as PostRow[];
+
+  if (esAdmin) {
+    pendingComments = (await db.sql`
+      SELECT
+        comments.id,
+        comments.post_id,
+        posts.title AS post_title,
+        comments.display_name,
+        comments.body
+      FROM comments
+      INNER JOIN posts ON posts.id = comments.post_id
+      WHERE comments.status = 'pending'
+      ORDER BY comments.created_at ASC
+      LIMIT 100
+    `) as unknown as PendingComment[];
+  }
+} catch (error) {
+  errorMessage =
+    error instanceof Error
+      ? error.message
+      : 'No se pudieron cargar los datos del panel.';
+}
+
+const tipoPublicacion = (kind: PostRow['kind']) =>
+  kind === 'news' ? 'Noticia' : 'Tutorial';
+
+const estadoPublicacion = (status: string) => {
+  const estados: Record<string, string> = {
+    draft: 'Borrador',
+    review: 'En revisión',
+    scheduled: 'Programada',
+    published: 'Publicada',
+    archived: 'Archivada',
+  };
+
+  return estados[status] ?? status;
+};
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Administración | FelixPlace</title>
+  </head>
+
+  <body>
+    <main class="panel">
+      <header class="encabezado">
+        <div>
+          <p class="marca">FELIXPLACE</p>
+          <h1>Panel de administración</h1>
+          <p class="sesion">
+            Sesión iniciada como <strong>{user.email}</strong>
+            {esAdmin ? ' · Administrador' : ' · Editor'}
+          </p>
+        </div>
+
+        <button id="logout-button" class="secundario" type="button">
+          Cerrar sesión
+        </button>
+      </header>
+
+      {actionError && <p class="aviso error">{actionError}</p>}
+      {publishMessage && <p class="aviso">{publishMessage}</p>}
+      {moderationMessage && <p class="aviso">{moderationMessage}</p>}
+
+      {esAdmin && (
+        <section class="seccion">
+          <div class="titulo-seccion">
+            <div>
+              <h2>Comentarios pendientes</h2>
+              <p>Aprueba los comentarios para que aparezcan en la página.</p>
+            </div>
+          </div>
+
+          {errorMessage ? (
+            <p class="aviso error">
+              No se pudieron cargar los datos: {errorMessage}
+            </p>
+          ) : pendingComments.length === 0 ? (
+            <p class="aviso">No hay comentarios pendientes de revisión.</p>
+          ) : (
+            <div class="lista">
+              {pendingComments.map((comment) => (
+                <article class="comentario">
+                  <div>
+                    <p class="autor">{comment.display_name}</p>
+                    <p class="sobre">
+                      Comentó en: <strong>{comment.post_title}</strong>
+                    </p>
+                    <p class="texto-comentario">{comment.body}</p>
+                  </div>
+
+                  <div class="botones-comentario">
+                    <form method="POST" action={actions.moderateComment}>
+                      <input
+                        type="hidden"
+                        name="comment_id"
+                        value={comment.id}
+                      />
+                      <input type="hidden" name="status" value="approved" />
+                      <button class="aprobar" type="submit">Aprobar</button>
+                    </form>
+
+                    <form method="POST" action={actions.moderateComment}>
+                      <input
+                        type="hidden"
+                        name="comment_id"
+                        value={comment.id}
+                      />
+                      <input type="hidden" name="status" value="rejected" />
+                      <button class="rechazar" type="submit">Rechazar</button>
+                    </form>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section class="seccion publicaciones">
+        <div class="titulo-seccion">
+          <div>
+            <h2>Publicaciones</h2>
+            <p>Noticias y tutoriales guardados en la base de datos.</p>
+          </div>
+
+          <a class="accion" href="/admin/nueva">Nueva publicación</a>
+        </div>
+
+        {errorMessage ? (
+          <p class="aviso error">
+            No se pudieron cargar las publicaciones: {errorMessage}
+          </p>
+        ) : posts.length === 0 ? (
+          <p class="aviso">
+            Todavía no hay publicaciones. Puedes crear la primera como borrador.
+          </p>
+        ) : (
+          <div class="lista">
+            {posts.map((post) => (
+              <article class="publicacion">
+                <div>
+                  <span class="tipo">{tipoPublicacion(post.kind)}</span>
+                  <h3>{post.title}</h3>
+                  <p class="slug">/{post.slug}</p>
+                </div>
+
+                <div class="acciones-publicacion">
+                  <a class="editar" href={`/admin/editar/${post.id}`}>Editar</a>
+                  <span class="estado">{estadoPublicacion(post.status)}</span>
+
+                  {(post.status === 'draft' || post.status === 'review') && (
+                    <form method="POST" action={actions.publishPost}>
+                      <input type="hidden" name="id" value={post.id} />
+                      <button class="aprobar" type="submit">Publicar</button>
+                    </form>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+
+    <script>
+      import { logout } from '@netlify/identity';
+
+      document
+        .querySelector('#logout-button')
+        ?.addEventListener('click', async () => {
+          await logout();
+          window.location.href = '/admin/login';
+        });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    min-height: 100vh;
+    margin: 0;
+    padding: 32px 20px;
+    background: #f3f5f8;
+    color: #172033;
+    font-family: Arial, sans-serif;
+  }
+
+  .panel {
+    width: min(100%, 960px);
+    margin: 0 auto;
+    padding: 32px;
+    border: 1px solid #e4e8ef;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 45px rgb(20 35 60 / 8%);
+  }
+
+  .encabezado,
+  .titulo-seccion,
+  .publicacion,
+  .comentario {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .encabezado {
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e4e8ef;
+  }
+
+  .marca {
+    margin: 0 0 8px;
+    color: #1769aa;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: 8px;
+  }
+
+  .sesion,
+  .titulo-seccion p,
+  .slug,
+  .sobre {
+    color: #647084;
+  }
+
+  .sesion {
+    margin-bottom: 0;
+  }
+
+  .seccion {
+    padding-top: 24px;
+  }
+
+  .titulo-seccion {
+    margin-bottom: 20px;
+  }
+
+  .titulo-seccion h2 {
+    margin-bottom: 6px;
+  }
+
+  .titulo-seccion p {
+    margin-bottom: 0;
+  }
+
+  .accion,
+  button {
+    display: inline-block;
+    padding: 11px 15px;
+    border: 0;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .secundario {
+    background: #edf2f7;
+    color: #172033;
+  }
+
+  .aprobar {
+    background: #1769aa;
+  }
+
+  .rechazar {
+    background: #a83232;
+  }
+
+  .lista {
+    display: grid;
+    gap: 12px;
+  }
+
+  .publicacion,
+  .comentario {
+    padding: 18px;
+    border: 1px solid #e4e8ef;
+    border-radius: 10px;
+  }
+
+  .publicacion h3 {
+    margin: 8px 0 4px;
+  }
+
+  .tipo,
+  .estado {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #edf4fb;
+    color: #1769aa;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .estado {
+    background: #f1f3f6;
+    color: #465166;
+    white-space: nowrap;
+  }
+
+  .slug {
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .acciones-publicacion,
+  .botones-comentario {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .editar {
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .autor {
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+
+  .sobre {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .texto-comentario {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .aviso {
+    padding: 16px;
+    border-radius: 8px;
+    background: #f3f6fa;
+  }
+
+  .error {
+    background: #fff1f0;
+    color: #9b2525;
+  }
+
+  @media (max-width: 640px) {
+    .panel {
+      padding: 22px 18px;
+    }
+
+    .encabezado,
+    .titulo-seccion,
+    .publicacion,
+    .comentario {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .acciones-publicacion,
+    .botones-comentario {
+      flex-wrap: wrap;
+    }
+  }
+</style>

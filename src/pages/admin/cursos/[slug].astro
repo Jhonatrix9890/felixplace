@@ -1,0 +1,345 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getDatabase } from '@netlify/database';
+import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
+
+type CourseRow = {
+  title: string;
+  slug: string;
+  summary: string;
+  description_markdown: string | null;
+  cover_image_url: string | null;
+  instructor_name: string;
+  level: string | null;
+  language: string;
+  access_model: 'free' | 'paid' | 'external';
+  price: string | number | null;
+  currency: string;
+  checkout_url: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+};
+
+const slug = Astro.params.slug ?? '';
+const db = getDatabase();
+
+const [course] = await db.sql<CourseRow>`
+  SELECT
+    title,
+    slug,
+    summary,
+    description_markdown,
+    cover_image_url,
+    instructor_name,
+    level,
+    language,
+    access_model,
+    price,
+    currency,
+    checkout_url,
+    seo_title,
+    seo_description
+  FROM courses
+  WHERE slug = ${slug}
+    AND status = 'published'
+  LIMIT 1
+`;
+
+if (!course) {
+  Astro.response.status = 404;
+}
+
+const pageTitle = course?.seo_title || course?.title || 'Curso no encontrado';
+const pageDescription =
+  course?.seo_description ||
+  course?.summary ||
+  'Cursos de tecnología y aprendizaje práctico en FelixPlace.';
+
+const siteUrl = Astro.site ?? new URL('https://felixplace.com');
+const canonicalUrl = course
+  ? new URL(`/cursos/${course.slug}`, siteUrl).toString()
+  : '';
+
+const descriptionHtml = course?.description_markdown
+  ? sanitizeHtml(await marked.parse(course.description_markdown))
+  : '';
+
+const modeloAcceso = (model: CourseRow['access_model']) => {
+  if (model === 'free') return 'Gratis';
+  if (model === 'paid') return 'De pago';
+  return 'Curso externo';
+};
+
+const precioCurso = (item: CourseRow) => {
+  if (item.access_model === 'free') return 'Gratis';
+  if (item.access_model === 'external') return 'Acceso externo';
+  if (item.price === null) return 'Precio próximamente';
+
+  const price = Number(item.price);
+
+  if (!Number.isFinite(price)) {
+    return `${item.currency} ${item.price}`;
+  }
+
+  try {
+    return new Intl.NumberFormat('es-EC', {
+      style: 'currency',
+      currency: item.currency.trim() || 'USD',
+    }).format(price);
+  } catch {
+    return `${item.currency} ${price.toFixed(2)}`;
+  }
+};
+---
+
+<BaseLayout
+  title={`${pageTitle} | FelixPlace`}
+  description={pageDescription}
+  canonical={canonicalUrl || undefined}
+  ogImage={course?.cover_image_url || undefined}
+  ogImageAlt={course ? `Portada del curso ${course.title}` : ''}
+>
+  <Fragment slot="head">
+    <meta
+      name="robots"
+      content={course ? 'index, follow' : 'noindex, nofollow'}
+    />
+  </Fragment>
+
+  <main class="pagina">
+    {course ? (
+      <>
+        <a class="volver" href="/cursos">← Volver a cursos</a>
+
+        <article class="ficha">
+          {course.cover_image_url && (
+            <img
+              class="portada"
+              src={course.cover_image_url}
+              alt={`Portada del curso ${course.title}`}
+              fetchpriority="high"
+            />
+          )}
+
+          <div class="contenido">
+            <p class="etiqueta">{modeloAcceso(course.access_model)}</p>
+            <h1>{course.title}</h1>
+            <p class="resumen">{course.summary}</p>
+
+            <dl class="datos">
+              <div>
+                <dt>Instructor</dt>
+                <dd>{course.instructor_name}</dd>
+              </div>
+
+              {course.level && (
+                <div>
+                  <dt>Nivel</dt>
+                  <dd>{course.level}</dd>
+                </div>
+              )}
+
+              <div>
+                <dt>Idioma</dt>
+                <dd>{course.language}</dd>
+              </div>
+
+              <div>
+                <dt>Acceso</dt>
+                <dd>{precioCurso(course)}</dd>
+              </div>
+            </dl>
+
+            {course.checkout_url ? (
+              <a
+                class="boton"
+                href={course.checkout_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {course.access_model === 'free'
+                  ? 'Acceder al curso'
+                  : 'Ver información del curso'}
+                <span aria-hidden="true"> →</span>
+              </a>
+            ) : (
+              <p class="proximamente">
+                El enlace de acceso estará disponible próximamente.
+              </p>
+            )}
+          </div>
+        </article>
+
+        {descriptionHtml && (
+          <section class="descripcion">
+            <h2>Sobre este curso</h2>
+            <div class="texto" set:html={descriptionHtml}></div>
+          </section>
+        )}
+      </>
+    ) : (
+      <section class="no-encontrado">
+        <h1>Curso no encontrado</h1>
+        <p>Este curso no existe o todavía no está publicado.</p>
+        <a class="boton" href="/cursos">Ver cursos</a>
+      </section>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .pagina {
+    width: min(100% - 40px, 900px);
+    margin: 0 auto;
+    padding: 40px 0 24px;
+  }
+
+  .volver {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #1769aa;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .volver:hover {
+    text-decoration: underline;
+  }
+
+  .ficha,
+  .descripcion,
+  .no-encontrado {
+    overflow: hidden;
+    border: 1px solid #e1e7ef;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 4px 18px rgb(23 32 51 / 6%);
+  }
+
+  .portada {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .contenido {
+    padding: clamp(22px, 5vw, 40px);
+  }
+
+  .etiqueta {
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #edf4fb;
+    color: #1769aa;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    color: #102247;
+    font-size: clamp(2rem, 6vw, 3.3rem);
+    line-height: 1.12;
+  }
+
+  .resumen {
+    color: #596579;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+
+  .datos {
+    display: grid;
+    gap: 12px;
+    max-width: 540px;
+    margin: 24px 0;
+  }
+
+  .datos div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e8edf3;
+  }
+
+  dt {
+    color: #647084;
+  }
+
+  dd {
+    margin: 0;
+    color: #172033;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .boton {
+    display: inline-block;
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: #1769aa;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .boton:hover {
+    background: #12558b;
+  }
+
+  .proximamente {
+    color: #647084;
+  }
+
+  .descripcion {
+    margin-top: 24px;
+    padding: clamp(22px, 5vw, 40px);
+  }
+
+  .descripcion h2,
+  .no-encontrado h1 {
+    margin-top: 0;
+    color: #102247;
+  }
+
+  .texto {
+    color: #253149;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .texto :global(h2),
+  .texto :global(h3) {
+    margin-top: 2rem;
+    line-height: 1.3;
+  }
+
+  .texto :global(a) {
+    color: #1769aa;
+  }
+
+  .texto :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .no-encontrado {
+    padding: clamp(22px, 5vw, 40px);
+  }
+
+  @media (max-width: 600px) {
+    .pagina {
+      width: min(100% - 32px, 900px);
+      padding-top: 28px;
+    }
+  }
+</style>
